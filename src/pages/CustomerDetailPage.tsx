@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { getCustomer, addPet, removePet } from '@/api/customerApi';
-import type { Customer, PetRequest } from '@/types/index.ts';
+import { getCustomer, addPet, removePet, updatePet } from '@/api/customerApi';
+import type { Customer, Pet, PetRequest } from '@/types/index.ts';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -13,12 +13,15 @@ export default function CustomerDetailPage() {
   const navigate = useNavigate();
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [open, setOpen] = useState(false);
+  const [editPetOpen, setEditPetOpen] = useState(false);
+  const [petToEdit, setPetToEdit] = useState<Pet | null>(null);
 
   useEffect(() => {
-    load();
+    if (id) load();
   }, [id]);
 
   async function load() {
+    if (!id) return;
     try {
       const data = await getCustomer(Number(id));
       setCustomer(data);
@@ -31,21 +34,34 @@ export default function CustomerDetailPage() {
   async function handleAddPet(data: PetRequest) {
     try {
       await addPet(Number(id), data);
-      toast.success('Pet added');
+      toast.success('Pet adicionado');
       setOpen(false);
       load();
     } catch {
-      toast.error('Failed to add pet');
+      toast.error('Erro ao adicionar pet');
+    }
+  }
+
+  async function handleEditPet(data: PetRequest) {
+    if (!petToEdit) return;
+    try {
+      await updatePet(Number(id), petToEdit.id, data);
+      toast.success('Pet atualizado');
+      setEditPetOpen(false);
+      setPetToEdit(null);
+      load();
+    } catch {
+      toast.error('Erro ao atualizar pet');
     }
   }
 
   async function handleRemovePet(petId: number) {
     try {
       await removePet(Number(id), petId);
-      toast.success('Pet removed');
+      toast.success('Pet removido');
       load();
     } catch {
-      toast.error('Failed to remove pet');
+      toast.error('Erro ao remover pet');
     }
   }
 
@@ -54,13 +70,13 @@ export default function CustomerDetailPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-4">
-        <Button variant="outline" onClick={() => navigate('/customers')}>← Back</Button>
+        <Button variant="outline" onClick={() => navigate('/customers')}>← Voltar</Button>
         <h2 className="text-xl font-semibold">{customer.name}</h2>
       </div>
 
       <div className="bg-white rounded-lg border p-4 flex flex-col gap-1 text-sm">
         <p><span className="text-gray-500">Email:</span> {customer.email}</p>
-        <p><span className="text-gray-500">Phone:</span> {customer.phone}</p>
+        <p><span className="text-gray-500">Telefone:</span> {customer.phone}</p>
         <p><span className="text-gray-500">CPF:</span> {customer.cpf}</p>
       </div>
 
@@ -69,11 +85,11 @@ export default function CustomerDetailPage() {
           <h3 className="font-semibold">Pets</h3>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button size="sm">Add pet</Button>
+              <Button size="sm">Adicionar pet</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Add pet</DialogTitle>
+                <DialogTitle>Adicionar pet</DialogTitle>
               </DialogHeader>
               <PetForm onSubmit={handleAddPet} />
             </DialogContent>
@@ -84,10 +100,10 @@ export default function CustomerDetailPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Species</TableHead>
-                <TableHead>Race</TableHead>
-                <TableHead>Age</TableHead>
+                <TableHead>Nome</TableHead>
+                <TableHead>Espécie</TableHead>
+                <TableHead>Raça</TableHead>
+                <TableHead>Idade</TableHead>
                 <TableHead></TableHead>
               </TableRow>
             </TableHeader>
@@ -99,9 +115,25 @@ export default function CustomerDetailPage() {
                   <TableCell>{p.race}</TableCell>
                   <TableCell>{p.age}</TableCell>
                   <TableCell>
-                    <Button variant="destructive" size="sm" onClick={() => handleRemovePet(p.id)}>
-                      Remove
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => {
+                          setPetToEdit(p);
+                          setEditPetOpen(true);
+                        }}
+                      >
+                        Editar
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleRemovePet(p.id)}
+                      >
+                        Remover
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -109,6 +141,24 @@ export default function CustomerDetailPage() {
           </Table>
         </div>
       </div>
+
+      <Dialog open={editPetOpen} onOpenChange={setEditPetOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar pet</DialogTitle>
+          </DialogHeader>
+          <PetForm
+            onSubmit={handleEditPet}
+            initial={petToEdit ? {
+              name: petToEdit.name,
+              age: petToEdit.age,
+              species: petToEdit.species,
+              race: petToEdit.race,
+              observations: petToEdit.observations,
+            } : undefined}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

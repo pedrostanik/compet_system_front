@@ -3,6 +3,7 @@ import { Toaster } from '@/components/ui/sonner';
 import Sidebar from '@/components/layout/Sidebar';
 import CustomersPage from '@/pages/CustomersPage';
 import CustomerDetailPage from '@/pages/CustomerDetailPage';
+import SchedulingPage from '@/pages/SchedulingPage';
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
             <Route path="/" element={<Navigate to="/customers" />} />
             <Route path="/customers" element={<CustomersPage />} />
             <Route path="/customers/:id" element={<CustomerDetailPage />} />
+            <Route path="/scheduling" element={<SchedulingPage />} />
           </Routes>
         </main>
       </div>

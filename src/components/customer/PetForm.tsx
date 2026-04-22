@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 
 interface Props {
   onSubmit: (data: PetRequest) => void;
+  initial?: Partial<PetRequest>;
 }
 
 export default function PetForm({ onSubmit }: Props) {

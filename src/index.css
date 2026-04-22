@@ -2,4 +2,20 @@
 
 body {
   margin: 0;
+  background-color: white;
+  color: #111;
+}
+
+:root {
+  color-scheme: light;
+}
+
+[data-slot="dialog-content"] {
+  background-color: white !important;
+  color: #111 !important;
+}
+
+input, select, textarea {
+  background-color: white !important;
+  color: #111 !important;
 }

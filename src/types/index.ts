@@ -30,3 +30,14 @@ export interface PetRequest {
   race: string;
   observations?: string;
 }
+
+export interface Pet {
+  id: number;
+  name: string;
+  age: number;
+  species: string;
+  race: string;
+  observations?: string;
+}
+
+
