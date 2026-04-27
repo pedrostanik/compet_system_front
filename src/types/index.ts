@@ -40,4 +40,48 @@ export interface Pet {
   observations?: string;
 }
 
+export interface Protocol {
+    id: number;
+    name: string;
+    description: string;
+    price?: number;
+
+}
+
+export interface ProtocolRequest {
+    name: string;
+    price?: number;
+    description: string;
+
+}
+
+export interface SchedulingProtocol {
+  protocolId: number;
+  protocolName: string;
+  protocolPrice: number;
+}
+
+
+export interface PackProtocol {
+  protocolId: number;
+  protocolName: string;
+  protocolDescription: string;
+}
+
+export interface Pack {
+  id: number;
+  petId: number;
+  petName: string;
+  customerId: number;
+  customerName: string;
+  protocols: PackProtocol[];
+}
+
+export interface PackRequest {
+  petId: number;
+  petName: string;
+  customerId: number;
+  customerName: string;
+  protocolIds: number[];
+}
 

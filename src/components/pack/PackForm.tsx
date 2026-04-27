@@ -1,30 +1,26 @@
 import { useState, useEffect } from 'react';
-import type { SchedulingRequest } from '@/api/schedulingApi';
+import type { PackRequest } from '@/types/index.ts';
+import type { Protocol } from '@/types/index.ts';
 import { getCustomers } from '@/api/customerApi';
 import { getProtocols } from '@/api/protocolApi';
 import type { Customer } from '@/types/index.ts';
-import type { Protocol } from '@/types/index.ts';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 
 interface Props {
-  onSubmit: (data: SchedulingRequest) => void;
-  initial?: Partial<SchedulingRequest>;
+  onSubmit: (data: PackRequest) => void;
+  initial?: Partial<PackRequest>;
 }
 
-export default function SchedulingForm({ onSubmit, initial }: Props) {
+export default function PackForm({ onSubmit, initial }: Props) {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [protocols, setProtocols] = useState<Protocol[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-  const [form, setForm] = useState<SchedulingRequest>({
+  const [form, setForm] = useState<PackRequest>({
     customerId: initial?.customerId ?? 0,
     customerName: initial?.customerName ?? '',
     petId: initial?.petId ?? 0,
     petName: initial?.petName ?? '',
-    schedulingObservations: initial?.schedulingObservations ?? '',
-    time: initial?.time ?? '',
-    isPackage: initial?.isPackage ?? false,
     protocolIds: initial?.protocolIds ?? [],
   });
 
@@ -33,21 +29,21 @@ export default function SchedulingForm({ onSubmit, initial }: Props) {
     getProtocols().then(setProtocols);
   }, []);
 
-useEffect(() => {
-  if (initial?.customerId && customers.length > 0) {
-    const customer = customers.find(c => c.id === initial.customerId);
-    if (customer) {
-      setSelectedCustomer(customer);
-      setForm(f => ({
-        ...f,
-        customerId: customer.id,
-        customerName: customer.name,
-        petId: initial.petId ?? 0,
-        petName: initial.petName ?? '',
-      }));
+  useEffect(() => {
+    if (initial?.customerId && customers.length > 0) {
+      const customer = customers.find(c => c.id === initial.customerId);
+      if (customer) {
+        setSelectedCustomer(customer);
+        setForm(f => ({
+          ...f,
+          customerId: customer.id,
+          customerName: customer.name,
+          petId: initial.petId ?? 0,
+          petName: initial.petName ?? '',
+        }));
+      }
     }
-  }
-}, [initial?.customerId, customers]);
+  }, [initial?.customerId, customers]);
 
   function handleCustomerChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const customer = customers.find(c => c.id === Number(e.target.value));
@@ -73,10 +69,6 @@ useEffect(() => {
     }));
   }
 
-  function handle(e: React.ChangeEvent<HTMLInputElement>) {
-    setForm(f => ({ ...f, [e.target.name]: e.target.value }));
-  }
-
   return (
     <div className="flex flex-col gap-4">
       <div>
@@ -84,7 +76,6 @@ useEffect(() => {
         <select
           className="w-full border rounded-md px-3 py-2 text-sm"
           onChange={handleCustomerChange}
-          defaultValue=""
           value={form.customerId || ''}
         >
           <option value="" disabled>Selecione um cliente</option>
@@ -100,7 +91,6 @@ useEffect(() => {
           <select
             className="w-full border rounded-md px-3 py-2 text-sm"
             onChange={handlePetChange}
-            defaultValue=""
             value={form.petId || ''}
           >
             <option value="" disabled>Selecione um pet</option>
@@ -111,28 +101,9 @@ useEffect(() => {
         </div>
       )}
 
-      <div>
-        <Label>Data e hora</Label>
-        <Input
-          name="time"
-          type="datetime-local"
-          value={form.time}
-          onChange={handle}
-        />
-      </div>
-
-      <div>
-        <Label>Observações</Label>
-        <Input
-          name="schedulingObservations"
-          value={form.schedulingObservations}
-          onChange={handle}
-        />
-      </div>
-
       {protocols.length > 0 && (
         <div>
-          <Label>Serviços</Label>
+          <Label>Serviços inclusos</Label>
           <div className="flex flex-col gap-2 mt-1 border rounded-md p-3">
             {protocols.map(p => (
               <div key={p.id} className="flex items-center gap-2">
@@ -155,16 +126,6 @@ useEffect(() => {
           </div>
         </div>
       )}
-
-      <div className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          id="isPackage"
-          checked={form.isPackage}
-          onChange={e => setForm(f => ({ ...f, isPackage: e.target.checked }))}
-        />
-        <Label htmlFor="isPackage">Pacote</Label>
-      </div>
 
       <Button onClick={() => onSubmit(form)}>Salvar</Button>
     </div>

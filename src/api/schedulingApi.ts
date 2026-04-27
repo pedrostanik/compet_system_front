@@ -1,8 +1,6 @@
-import axios from 'axios';
+import type { SchedulingProtocol } from '@/types/index.ts';
+import api from './axios';
 
-const api = axios.create({
-  baseURL: 'http://localhost:8080',
-});
 
 api.interceptors.request.use(request => {
   console.log('API call:', request.method, request.url);
@@ -17,6 +15,7 @@ export interface SchedulingRequest {
   schedulingObservations?: string;
   time: string;
   isPackage: boolean;
+  protocolIds: number[];
 }
 
 export interface SchedulingResponse {
@@ -29,6 +28,7 @@ export interface SchedulingResponse {
   time: string;
   scheduleHappened: boolean;
   isPackage: boolean;
+  protocols: SchedulingProtocol[];
 }
 
 export const getSchedulings = () =>

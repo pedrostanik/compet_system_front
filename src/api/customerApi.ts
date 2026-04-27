@@ -1,11 +1,7 @@
-import axios from 'axios';
 import type { Customer } from '@/types/index.ts';
 import type { CustomerRequest } from '@/types/index.ts';
 import type { PetRequest } from '@/types/index.ts';
-
-const api = axios.create({
-  baseURL: 'http://localhost:8080',
-});
+import api from './axios';
 
 export const getCustomers = () =>
   api.get<Customer[]>('/api/customers').then(r => r.data);

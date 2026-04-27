@@ -155,58 +155,57 @@ async function handleEdit(data: SchedulingRequest) {
         </Dialog>
       </div>
 
-      {selectedEvent && (
-        <div className="bg-white border rounded-lg p-4 text-sm">
-          <div className="flex justify-between items-start">
-            <div className="flex flex-col gap-1">
-              <p><span className="text-gray-500">Cliente:</span> {selectedEvent.resource.customerName}</p>
-              <p><span className="text-gray-500">Pet:</span> {selectedEvent.resource.petName}</p>
-              <p><span className="text-gray-500">Horário:</span> {format(selectedEvent.start, "dd/MM/yyyy HH:mm")}</p>
-              {selectedEvent.resource.schedulingObservations && (
-                <p><span className="text-gray-500">Obs:</span> {selectedEvent.resource.schedulingObservations}</p>
-              )}
-              <p>
-                <span className="text-gray-500">Status:</span>{' '}
-                {selectedEvent.resource.scheduleHappened ? (
-                  <span className="text-green-600 font-medium">Realizado</span>
-                ) : (
-                  <span className="text-yellow-600 font-medium">Pendente</span>
-                )}
-              </p>
-            </div>
+{selectedEvent && (
+  <div className="bg-white border rounded-lg p-4 text-sm">
+    <div className="flex justify-between items-start">
+      <div className="flex flex-col gap-1">
+        <p><span className="text-gray-500">Cliente:</span> {selectedEvent.resource.customerName}</p>
+        <p><span className="text-gray-500">Pet:</span> {selectedEvent.resource.petName}</p>
+        <p><span className="text-gray-500">Horário:</span> {format(selectedEvent.start, "dd/MM/yyyy HH:mm")}</p>
+        {selectedEvent.resource.schedulingObservations && (
+          <p><span className="text-gray-500">Obs:</span> {selectedEvent.resource.schedulingObservations}</p>
+        )}
+        <p>
+          <span className="text-gray-500">Status:</span>{' '}
+          {selectedEvent.resource.scheduleHappened ? (
+            <span className="text-green-600 font-medium">Realizado</span>
+          ) : (
+            <span className="text-yellow-600 font-medium">Pendente</span>
+          )}
+        </p>
 
-            <div className="flex flex-col gap-2">
-              {!selectedEvent.resource.scheduleHappened && (
-                <>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      setEventToEdit(selectedEvent);
-                      setEditOpen(true);
-                    }}
-                  >
-                    Editar
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => handleMarkAsHappened(selectedEvent.resource.id)}
-                  >
-                    Marcar realizado
-                  </Button>
-                </>
-              )}
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => handleDelete(selectedEvent.resource.id)}
-              >
-                Deletar
-              </Button>
+        {selectedEvent.resource.protocols && selectedEvent.resource.protocols.length > 0 && (
+          <div className="mt-2">
+            <p className="text-gray-500 mb-1">Serviços:</p>
+            <div className="flex flex-col gap-1">
+              {selectedEvent.resource.protocols.map(p => (
+                <div key={p.protocolId} className="flex justify-between text-xs bg-gray-50 rounded px-2 py-1">
+                  <span>{p.protocolName}</span>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
+
+      <div className="flex flex-col gap-2">
+        {!selectedEvent.resource.scheduleHappened && (
+          <>
+            <Button size="sm" variant="outline" onClick={() => setEditOpen(true)}>
+              Editar
+            </Button>
+            <Button size="sm" onClick={() => handleMarkAsHappened(selectedEvent.resource.id)}>
+              Marcar realizado
+            </Button>
+          </>
+        )}
+        <Button variant="destructive" size="sm" onClick={() => handleDelete(selectedEvent.resource.id)}>
+          Deletar
+        </Button>
+      </div>
+    </div>
+  </div>
+)}
 
 <Dialog open={editOpen} onOpenChange={setEditOpen}>
   <DialogContent>
@@ -223,6 +222,9 @@ async function handleEdit(data: SchedulingRequest) {
         customerName: eventToEdit?.resource.customerName,
         petId: eventToEdit?.resource.petId,
         petName: eventToEdit?.resource.petName,
+        schedulingObservations: eventToEdit?.resource.schedulingObservations,
+        isPackage: eventToEdit?.resource.isPackage,
+        protocolIds: eventToEdit?.resource.protocols?.map(p => p.protocolId) ?? [],
       }}
     />
   </DialogContent>
