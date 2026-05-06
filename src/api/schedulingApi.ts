@@ -16,6 +16,7 @@ export interface SchedulingRequest {
   time: string;
   isPackage: boolean;
   protocolIds: number[];
+  duration: number;
 }
 
 export interface SchedulingResponse {
@@ -28,6 +29,8 @@ export interface SchedulingResponse {
   time: string;
   scheduleHappened: boolean;
   isPackage: boolean;
+  duration?: number;
+  intercepted: boolean;
   protocols: SchedulingProtocol[];
 }
 

@@ -53,16 +53,16 @@ export default function SchedulingPage() {
     }
   }
 
-  function toEvent(s: SchedulingResponse): CalendarEvent {
-    const start = new Date(s.time);
-    const end = new Date(start.getTime() + 60 * 60 * 1000);
-    return {
-      title: `${s.customerName} — ${s.petName}`,
-      start,
-      end,
-      resource: s,
-    };
-  }
+      function toEvent(s: SchedulingResponse): CalendarEvent {
+        const start = new Date(s.time);
+        const end = new Date(start.getTime() + (s.duration ?? 60) * 60 * 1000);
+        return {
+          title: `${s.customerName} — ${s.petName}`,
+          start,
+          end,
+          resource: s,
+        };
+      }
 
   async function handleCreate(data: SchedulingRequest) {
     try {
@@ -123,10 +123,15 @@ async function handleEdit(data: SchedulingRequest) {
   }
 
   function eventStyleGetter(event: CalendarEvent) {
-    const happened = event.resource.scheduleHappened;
+    const { scheduleHappened, intercepted } = event.resource;
+
+    let backgroundColor = '#1D9E75'; // verde — padrão
+    if (scheduleHappened) backgroundColor = '#6b7280'; // cinza — realizado
+    if (intercepted) backgroundColor = '#DC2626'; // vermelho — interceptado
+
     return {
       style: {
-        backgroundColor: happened ? '#6b7280' : '#1D9E75',
+        backgroundColor,
         borderRadius: '4px',
         border: 'none',
         color: 'white',
@@ -162,6 +167,7 @@ async function handleEdit(data: SchedulingRequest) {
         <p><span className="text-gray-500">Cliente:</span> {selectedEvent.resource.customerName}</p>
         <p><span className="text-gray-500">Pet:</span> {selectedEvent.resource.petName}</p>
         <p><span className="text-gray-500">Horário:</span> {format(selectedEvent.start, "dd/MM/yyyy HH:mm")}</p>
+        <p><span className="text-gray-500">Duração:</span> {selectedEvent.resource.duration} min</p>
         {selectedEvent.resource.schedulingObservations && (
           <p><span className="text-gray-500">Obs:</span> {selectedEvent.resource.schedulingObservations}</p>
         )}
@@ -173,6 +179,13 @@ async function handleEdit(data: SchedulingRequest) {
             <span className="text-yellow-600 font-medium">Pendente</span>
           )}
         </p>
+
+        {/* adiciona isso logo abaixo */}
+        {selectedEvent.resource.intercepted && (
+          <p className="flex items-center gap-1 text-red-600 font-medium">
+            ⚠️ Conflito de horário detectado
+          </p>
+        )}
 
         {selectedEvent.resource.protocols && selectedEvent.resource.protocols.length > 0 && (
           <div className="mt-2">
@@ -191,7 +204,14 @@ async function handleEdit(data: SchedulingRequest) {
       <div className="flex flex-col gap-2">
         {!selectedEvent.resource.scheduleHappened && (
           <>
-            <Button size="sm" variant="outline" onClick={() => setEditOpen(true)}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setEventToEdit(selectedEvent); // Salva o evento para o formulário carregar os dados
+                setEditOpen(true);            // Abre o dialog
+              }}
+            >
               Editar
             </Button>
             <Button size="sm" onClick={() => handleMarkAsHappened(selectedEvent.resource.id)}>
@@ -212,21 +232,22 @@ async function handleEdit(data: SchedulingRequest) {
     <DialogHeader>
       <DialogTitle>Editar agendamento</DialogTitle>
     </DialogHeader>
-    <SchedulingForm
-      onSubmit={handleEdit}
-      initial={{
-        time: eventToEdit
-          ? format(eventToEdit.start, "yyyy-MM-dd'T'HH:mm")
-          : '',
-        customerId: eventToEdit?.resource.customerId,
-        customerName: eventToEdit?.resource.customerName,
-        petId: eventToEdit?.resource.petId,
-        petName: eventToEdit?.resource.petName,
-        schedulingObservations: eventToEdit?.resource.schedulingObservations,
-        isPackage: eventToEdit?.resource.isPackage,
-        protocolIds: eventToEdit?.resource.protocols?.map(p => p.protocolId) ?? [],
-      }}
-    />
+     <SchedulingForm
+              onSubmit={handleEdit}
+              initial={{
+                time: eventToEdit
+                  ? format(eventToEdit.start, "yyyy-MM-dd'T'HH:mm")
+                  : '',
+                customerId: eventToEdit?.resource.customerId,
+                customerName: eventToEdit?.resource.customerName,
+                petId: eventToEdit?.resource.petId,
+                petName: eventToEdit?.resource.petName,
+                schedulingObservations: eventToEdit?.resource.schedulingObservations,
+                isPackage: eventToEdit?.resource.isPackage,
+                protocolIds: eventToEdit?.resource.protocols?.map(p => p.protocolId) ?? [],
+                duration: eventToEdit?.resource.duration ?? 60,
+              }}
+            />
   </DialogContent>
 </Dialog>
 

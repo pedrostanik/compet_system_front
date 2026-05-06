@@ -17,7 +17,7 @@ export default function SchedulingForm({ onSubmit, initial }: Props) {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [protocols, setProtocols] = useState<Protocol[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-  const [form, setForm] = useState<SchedulingRequest>({
+ const [form, setForm] = useState<SchedulingRequest>({
     customerId: initial?.customerId ?? 0,
     customerName: initial?.customerName ?? '',
     petId: initial?.petId ?? 0,
@@ -26,6 +26,7 @@ export default function SchedulingForm({ onSubmit, initial }: Props) {
     time: initial?.time ?? '',
     isPackage: initial?.isPackage ?? false,
     protocolIds: initial?.protocolIds ?? [],
+    duration: initial?.duration ?? 60,
   });
 
   useEffect(() => {
@@ -121,14 +122,25 @@ useEffect(() => {
         />
       </div>
 
-      <div>
-        <Label>Observações</Label>
-        <Input
-          name="schedulingObservations"
-          value={form.schedulingObservations}
-          onChange={handle}
-        />
-      </div>
+  <div>
+            <Label>Observações</Label>
+            <Input
+              name="schedulingObservations"
+              value={form.schedulingObservations}
+              onChange={handle}
+            />
+          </div>
+
+          <div>
+            <Label>Duração (minutos)</Label>
+            <Input
+              name="duration"
+              type="number"
+              min={1}
+              value={form.duration}
+              onChange={e => setForm(f => ({ ...f, duration: Number(e.target.value) }))}
+            />
+          </div>
 
       {protocols.length > 0 && (
         <div>
