@@ -14,5 +14,5 @@ export const getCoatTypes = () =>
 export const getCatBreeds = () =>
   api.get<EnumOption[]>('/api/enums/cat-breeds').then(r => r.data);
 
- export const getCatBreeds = () =>
-   api.get<EnumOption[]>('/api/enums/cat-breeds').then(r => r.data);
+ export const getDogBreeds = () =>
+   api.get<EnumOption[]>('/api/enums/dog-breeds').then(r => r.data);

@@ -3,6 +3,8 @@ import { NavLink } from 'react-router-dom';
 import { Users, CalendarDays, Package, BarChart2, Menu, X, FileText } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { LogOut } from 'lucide-react';
+import { ShoppingBag } from 'lucide-react';
+import { Receipt } from 'lucide-react';
 
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
@@ -15,6 +17,8 @@ const { logout } = useAuth();
     { to: '/pack', icon: <Package size={16} />, label: 'Pacotes' },
     { to: '/report', icon: <BarChart2 size={16} />, label: 'Relatório' },
     { to: '/protocol', icon: <FileText size={16} />, label: 'Procedimentos' },
+    { to: '/products', icon: <ShoppingBag size={16} />, label: 'Produtos' },
+    { to: '/receipts', icon: <Receipt size={16} />, label: 'Recibos' },
   ];
 
   return (

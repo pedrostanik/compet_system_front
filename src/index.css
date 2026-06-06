@@ -19,3 +19,9 @@ input, select, textarea {
   background-color: white !important;
   color: #111 !important;
 }
+
+[data-radix-popper-content-wrapper],
+[role="alertdialog"] {
+  background-color: white !important;
+  color: #111 !important;
+}

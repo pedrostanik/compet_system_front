@@ -8,6 +8,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import PetForm from '@/components/customer/PetForm';
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
 export default function CustomerDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -26,7 +38,7 @@ export default function CustomerDetailPage() {
       const data = await getCustomer(Number(id));
       setCustomer(data);
     } catch {
-      toast.error('Customer not found');
+      toast.error('Cliente não encontrado');
       navigate('/customers');
     }
   }
@@ -65,7 +77,7 @@ export default function CustomerDetailPage() {
     }
   }
 
-  if (!customer) return <p>Loading...</p>;
+  if (!customer) return <p>Carregando...</p>;
 
   return (
     <div className="flex flex-col gap-6">
@@ -78,6 +90,7 @@ export default function CustomerDetailPage() {
         <p><span className="text-gray-500">Email:</span> {customer.email}</p>
         <p><span className="text-gray-500">Telefone:</span> {customer.phone}</p>
         <p><span className="text-gray-500">CPF:</span> {customer.cpf}</p>
+        <p><span className="text-gray-500">Endereço:</span> {customer.address}</p>
       </div>
 
       <div>
@@ -103,19 +116,48 @@ export default function CustomerDetailPage() {
                 <TableHead>Nome</TableHead>
                 <TableHead>Espécie</TableHead>
                 <TableHead>Raça</TableHead>
-                <TableHead>Idade</TableHead>
-                <TableHead></TableHead>
+                <TableHead>Peso</TableHead>
+                <TableHead>Pelagem</TableHead>
+                <TableHead>Vacinas</TableHead>
+                <TableHead>Infos Adicionais</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {customer.pets.map(p => (
                 <TableRow key={p.id}>
-                  <TableCell>{p.name}</TableCell>
+                  <TableCell className="font-medium">{p.name}</TableCell>
                   <TableCell>{p.species}</TableCell>
                   <TableCell>{p.race}</TableCell>
-                  <TableCell>{p.age}</TableCell>
+                  <TableCell>{p.weight ? `${p.weight}kg` : '-'}</TableCell>
+                  <TableCell>{p.coatType || '-'}</TableCell>
                   <TableCell>
-                    <div className="flex gap-2">
+                    <div className="flex gap-1 text-lg">
+                      {p.rabieVaccination && <span title="Antirrábica" className="cursor-help">💉R</span>}
+                      {p.v10Vaccination && <span title="V10" className="cursor-help">💉V10</span>}
+                      {p.dewormed && <span title="Vermifugado" className="cursor-help">🐛</span>}
+                      {!p.rabieVaccination && !p.v10Vaccination && !p.dewormed && <span className="text-gray-300">-</span>}
+                    </div>
+                  </TableCell>
+
+                  <TableCell>
+                            <div className="flex flex-col gap-1 text-xs max-w-[200px]">
+                              {p.allergy && (
+                                <p><span className="font-bold text-red-600">Alergia:</span> {p.allergy}</p>
+                              )}
+                              {p.healthIssues && (
+                                <p><span className="font-bold text-orange-600">Saúde:</span> {p.healthIssues}</p>
+                              )}
+                              {p.observations && (
+                                <p><span className="font-bold text-gray-600">Obs:</span> {p.observations}</p>
+                              )}
+                              {/* Se tudo for vazio, mostra o traço clássico */}
+                              {!p.allergy && !p.healthIssues && !p.observations && <span className="text-gray-300">-</span>}
+                            </div>
+                  </TableCell>
+
+                  <TableCell className="text-right">
+                    <div className="flex gap-2 justify-end">
                       <Button
                         variant="secondary"
                         size="sm"
@@ -126,13 +168,31 @@ export default function CustomerDetailPage() {
                       >
                         Editar
                       </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleRemovePet(p.id)}
-                      >
-                        Remover
-                      </Button>
+
+                      {/* Pop-up de Confirmação para Deletar Pet */}
+                           <AlertDialog>
+                             <AlertDialogTrigger asChild>
+                               <Button variant="destructive" size="sm">Remover</Button>
+                             </AlertDialogTrigger>
+                             <AlertDialogContent>
+                               <AlertDialogHeader>
+                                 <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                                 <AlertDialogDescription>
+                                   Esta ação não pode ser desfeita. Isso excluirá permanentemente o pet
+                                   <strong> {p.name}</strong> do nosso sistema.
+                                 </AlertDialogDescription>
+                               </AlertDialogHeader>
+                               <AlertDialogFooter>
+                                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                 <AlertDialogAction
+                                   onClick={() => handleRemovePet(p.id)}
+                                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                 >
+                                   Confirmar Exclusão
+                                 </AlertDialogAction>
+                               </AlertDialogFooter>
+                             </AlertDialogContent>
+                           </AlertDialog>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -147,15 +207,10 @@ export default function CustomerDetailPage() {
           <DialogHeader>
             <DialogTitle>Editar pet</DialogTitle>
           </DialogHeader>
+          {/* Usando o spread ...petToEdit para garantir que TODOS os campos cheguem ao form */}
           <PetForm
             onSubmit={handleEditPet}
-            initial={petToEdit ? {
-              name: petToEdit.name,
-              age: petToEdit.age,
-              species: petToEdit.species,
-              race: petToEdit.race,
-              observations: petToEdit.observations,
-            } : undefined}
+            initial={petToEdit ?? undefined}
           />
         </DialogContent>
       </Dialog>

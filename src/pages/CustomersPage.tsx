@@ -8,6 +8,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import type { Customer, CustomerRequest } from '@/types/index.ts';
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [open, setOpen] = useState(false);
@@ -86,6 +98,7 @@ export default function CustomersPage() {
               <TableHead>Nome</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Telefone</TableHead>
+              <TableHead>Endereço</TableHead>
               <TableHead>Pets</TableHead>
               <TableHead></TableHead>
             </TableRow>
@@ -96,6 +109,7 @@ export default function CustomersPage() {
                 <TableCell onClick={() => navigate(`/customers/${c.id}`)}>{c.name}</TableCell>
                 <TableCell onClick={() => navigate(`/customers/${c.id}`)}>{c.email}</TableCell>
                 <TableCell onClick={() => navigate(`/customers/${c.id}`)}>{c.phone}</TableCell>
+                <TableCell onClick={() => navigate(`/customers/${c.id}`)}>{c.address}</TableCell>
                 <TableCell onClick={() => navigate(`/customers/${c.id}`)}>{c.pets.length}</TableCell>
                 <TableCell>
                   <div className="flex gap-2">
@@ -109,13 +123,30 @@ export default function CustomersPage() {
                     >
                       Editar
                     </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDelete(c.id)}
-                    >
-                      Deletar
-                    </Button>
+                    {/* Pop-up de Confirmação para Deletar Cliente */}
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="destructive" size="sm">Deletar</Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Excluir Cliente?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Ao excluir <strong>{c.name}</strong>, todos os pets vinculados a este cliente
+                                também serão removidos.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(c.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Sim, excluir tudo
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                   </div>
                 </TableCell>
               </TableRow>
@@ -135,6 +166,7 @@ export default function CustomersPage() {
               name: customerToEdit.name,
               email: customerToEdit.email,
               phone: customerToEdit.phone,
+              address: customerToEdit.address,
               cpf: customerToEdit.cpf,
             } : undefined}
           />

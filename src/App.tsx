@@ -10,6 +10,8 @@ import SchedulingPage from '@/pages/SchedulingPage';
 import PackPage from '@/pages/PackPage';
 import ReportPage from '@/pages/ReportPage';
 import ProtocolPage from '@/pages/ProtocolPage';
+import ProductsPage from '@/pages/ProductsPage';
+import ReceiptsPage from '@/pages/ReceiptsPage';
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -31,10 +33,13 @@ export default function App() {
           <Route path="/" element={<Navigate to="/customers" />} />
           <Route path="/customers" element={<PrivateRoute><Layout><CustomersPage /></Layout></PrivateRoute>} />
           <Route path="/customers/:id" element={<PrivateRoute><Layout><CustomerDetailPage /></Layout></PrivateRoute>} />
-           <Route path="/scheduling" element={<PrivateRoute><Layout><SchedulingPage /></Layout></PrivateRoute>} />
+          <Route path="/scheduling" element={<PrivateRoute><Layout><SchedulingPage /></Layout></PrivateRoute>} />
           <Route path="/protocol" element={<PrivateRoute><Layout><ProtocolPage /></Layout></PrivateRoute>} />
-           <Route path="/pack" element={<PrivateRoute><Layout><PackPage /></Layout></PrivateRoute>} />
+          <Route path="/pack" element={<PrivateRoute><Layout><PackPage /></Layout></PrivateRoute>} />
           <Route path="/report" element={<PrivateRoute><Layout><ReportPage /></Layout></PrivateRoute>} />
+          <Route path="/products" element={<PrivateRoute><Layout><ProductsPage /></Layout></PrivateRoute>} />
+          <Route path="/receipts" element={<PrivateRoute><Layout><ReceiptsPage /></Layout></PrivateRoute>} />
+
         </Routes>
         <Toaster />
       </BrowserRouter>
