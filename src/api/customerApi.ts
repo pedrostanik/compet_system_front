@@ -26,3 +26,8 @@ export const updatePet = (customerId: number, petId: number, data: PetRequest) =
 
 export const removePet = (customerId: number, petId: number) =>
   api.delete(`/api/customers/${customerId}/pets/${petId}`);
+
+export async function searchCustomer(term: string): Promise<Customer[]> {
+   const { data } = await api.get('/api/customers/search', { params: { term } });
+   return data;
+ }

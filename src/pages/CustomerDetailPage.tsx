@@ -91,6 +91,7 @@ export default function CustomerDetailPage() {
         <p><span className="text-gray-500">Telefone:</span> {customer.phone}</p>
         <p><span className="text-gray-500">CPF:</span> {customer.cpf}</p>
         <p><span className="text-gray-500">Endereço:</span> {customer.address}</p>
+        <p><span className="text-gray-500">Observações:</span> {customer.obs}</p>
       </div>
 
       <div>
@@ -114,10 +115,12 @@ export default function CustomerDetailPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Nome</TableHead>
+                <TableHead>Idade</TableHead>
                 <TableHead>Espécie</TableHead>
                 <TableHead>Raça</TableHead>
                 <TableHead>Peso</TableHead>
                 <TableHead>Pelagem</TableHead>
+                <TableHead>Pacote</TableHead>
                 <TableHead>Vacinas</TableHead>
                 <TableHead>Infos Adicionais</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
@@ -127,10 +130,23 @@ export default function CustomerDetailPage() {
               {customer.pets.map(p => (
                 <TableRow key={p.id}>
                   <TableCell className="font-medium">{p.name}</TableCell>
+                  <TableCell>{p.age}</TableCell>
                   <TableCell>{p.species}</TableCell>
                   <TableCell>{p.race}</TableCell>
                   <TableCell>{p.weight ? `${p.weight}kg` : '-'}</TableCell>
                   <TableCell>{p.coatType || '-'}</TableCell>
+                  <TableCell>
+                    {p.packId ? (
+                      <span
+                        className="text-xs bg-green-100 text-green-800 rounded px-2 py-0.5"
+                        title={p.packagePrice ? `R$ ${Number(p.packagePrice).toFixed(2)}` : undefined}
+                      >
+                        Pacote
+                      </span>
+                    ) : (
+                      <span className="text-gray-300">-</span>
+                    )}
+                  </TableCell>
                   <TableCell>
                     <div className="flex gap-1 text-lg">
                       {p.rabieVaccination && <span title="Antirrábica" className="cursor-help">💉R</span>}

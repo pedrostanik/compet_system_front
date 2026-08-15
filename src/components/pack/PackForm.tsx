@@ -1,133 +1,190 @@
 import { useState, useEffect } from 'react';
-import type { PackRequest } from '@/types/index.ts';
-import type { Protocol } from '@/types/index.ts';
-import { getCustomers } from '@/api/customerApi';
 import { getProtocols } from '@/api/protocolApi';
-import type { Customer } from '@/types/index.ts';
-import { Label } from '@/components/ui/label';
+import type { Protocol, PackRequest } from '@/types/index.ts';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Trash2, Plus } from 'lucide-react';
+
+interface PackProtocolEntry {
+  protocolId: number;
+  quantity: number;
+}
 
 interface Props {
   onSubmit: (data: PackRequest) => void;
   initial?: Partial<PackRequest>;
 }
 
+// Converte "2026-06-25T14:30:00" (do backend) <-> "2026-06-25T14:30" (do <input type="datetime-local">)
+//function toInputValue(isoDateTime?: string): string {
+//  if (!isoDateTime) return '';
+//  return isoDateTime.slice(0, 16);
+//}
+
 export default function PackForm({ onSubmit, initial }: Props) {
-  const [customers, setCustomers] = useState<Customer[]>([]);
   const [protocols, setProtocols] = useState<Protocol[]>([]);
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-  const [form, setForm] = useState<PackRequest>({
-    customerId: initial?.customerId ?? 0,
-    customerName: initial?.customerName ?? '',
-    petId: initial?.petId ?? 0,
-    petName: initial?.petName ?? '',
-    protocolIds: initial?.protocolIds ?? [],
-  });
+  const [name, setName] = useState(initial?.name ?? '');
+  const [frequencia, setFrequencia] = useState(initial?.frequencia ?? '');
+  const [entries, setEntries] = useState<PackProtocolEntry[]>(
+    initial?.protocols ?? []
+  );
 
   useEffect(() => {
-    getCustomers().then(setCustomers);
-    getProtocols().then(setProtocols);
+    getProtocols().then(setProtocols).catch(() => {});
   }, []);
 
-  useEffect(() => {
-    if (initial?.customerId && customers.length > 0) {
-      const customer = customers.find(c => c.id === initial.customerId);
-      if (customer) {
-        setSelectedCustomer(customer);
-        setForm(f => ({
-          ...f,
-          customerId: customer.id,
-          customerName: customer.name,
-          petId: initial.petId ?? 0,
-          petName: initial.petName ?? '',
-        }));
-      }
-    }
-  }, [initial?.customerId, customers]);
-
-  function handleCustomerChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    const customer = customers.find(c => c.id === Number(e.target.value));
-    if (customer) {
-      setSelectedCustomer(customer);
-      setForm(f => ({ ...f, customerId: customer.id, customerName: customer.name, petId: 0, petName: '' }));
-    }
+  function addEntry() {
+    setEntries(prev => [...prev, { protocolId: 0, quantity: 1 }]);
   }
 
-  function handlePetChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    const pet = selectedCustomer?.pets.find(p => p.id === Number(e.target.value));
-    if (pet) {
-      setForm(f => ({ ...f, petId: pet.id, petName: pet.name }));
-    }
+  function removeEntry(index: number) {
+    setEntries(prev => prev.filter((_, i) => i !== index));
   }
 
-  function handleProtocolToggle(protocolId: number) {
-    setForm(f => ({
-      ...f,
-      protocolIds: f.protocolIds.includes(protocolId)
-        ? f.protocolIds.filter(id => id !== protocolId)
-        : [...f.protocolIds, protocolId],
-    }));
+  function updateEntry(index: number, field: keyof PackProtocolEntry, value: number) {
+    setEntries(prev =>
+      prev.map((e, i) => (i === index ? { ...e, [field]: value } : e))
+    );
   }
+
+  function handleSubmit() {
+    if (!name.trim()) return;
+    if (!frequencia) return;
+    if (entries.some(e => e.protocolId === 0 || e.quantity < 1)) return;
+
+    onSubmit({
+      name,
+      frequencia,
+      protocols: entries,
+    });
+  }
+
+  // IDs já selecionados para evitar duplicata no mesmo select
+  const selectedIds = entries.map(e => e.protocolId);
 
   return (
-    <div className="flex flex-col gap-4">
-      <div>
-        <Label>Cliente</Label>
-        <select
-          className="w-full border rounded-md px-3 py-2 text-sm"
-          onChange={handleCustomerChange}
-          value={form.customerId || ''}
-        >
-          <option value="" disabled>Selecione um cliente</option>
-          {customers.map(c => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
+    <div className="space-y-5">
+
+      {/* Nome */}
+      <div className="space-y-1.5">
+        <Label>Nome do pacote</Label>
+        <Input
+          placeholder="Ex: Pacote Mensal Premium"
+          value={name}
+          onChange={e => setName(e.target.value)}
+        />
       </div>
 
-      {selectedCustomer && (
-        <div>
-          <Label>Pet</Label>
-          <select
-            className="w-full border rounded-md px-3 py-2 text-sm"
-            onChange={handlePetChange}
-            value={form.petId || ''}
-          >
-            <option value="" disabled>Selecione um pet</option>
-            {selectedCustomer.pets.map(p => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </select>
-        </div>
-      )}
+      {/* Frequência */}
+      <div className="space-y-1.5">
+        <Label>Frequência</Label>
+        <Select value={frequencia} onValueChange={setFrequencia}>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione a frequência" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Semanal">Semanal</SelectItem>
+            <SelectItem value="Quinzenal">Quinzenal</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
-      {protocols.length > 0 && (
-        <div>
-          <Label>Serviços inclusos</Label>
-          <div className="flex flex-col gap-2 mt-1 border rounded-md p-3">
-            {protocols.map(p => (
-              <div key={p.id} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id={`protocol-${p.id}`}
-                  checked={form.protocolIds.includes(p.id)}
-                  onChange={() => handleProtocolToggle(p.id)}
-                />
-                <label htmlFor={`protocol-${p.id}`} className="text-sm cursor-pointer">
-                  {p.name}
-                  {p.price && (
-                    <span className="text-gray-400 ml-2">
-                      R$ {Number(p.price).toFixed(2)}
-                    </span>
-                  )}
-                </label>
+      {/* Serviços */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label>Serviços</Label>
+          <Button type="button" variant="outline" size="sm" onClick={addEntry}>
+            <Plus className="w-4 h-4 mr-1" />
+            Adicionar serviço
+          </Button>
+        </div>
+
+        {entries.length === 0 && (
+          <p className="text-sm text-muted-foreground py-2">
+            Nenhum serviço adicionado ainda.
+          </p>
+        )}
+
+        <div className="space-y-2">
+          {entries.map((entry, index) => (
+            <div key={index} className="flex items-center gap-2">
+
+              {/* Seletor de protocolo */}
+              <div className="flex-1">
+                <Select
+                  value={entry.protocolId ? String(entry.protocolId) : ''}
+                  onValueChange={val => updateEntry(index, 'protocolId', Number(val))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o serviço" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {protocols.map(p => (
+                      <SelectItem
+                        key={p.id}
+                        value={String(p.id)}
+                        disabled={
+                          selectedIds.includes(p.id) && p.id !== entry.protocolId
+                        }
+                      >
+                        {p.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
 
-      <Button onClick={() => onSubmit(form)}>Salvar</Button>
+              {/* Quantidade */}
+              <div className="w-24">
+                <Input
+                  type="number"
+                  min={1}
+                  placeholder="Qtd"
+                  value={entry.quantity}
+                  onChange={e =>
+                    updateEntry(index, 'quantity', Math.max(1, Number(e.target.value)))
+                  }
+                />
+              </div>
+
+              {/* Remover */}
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => removeEntry(index)}
+                className="text-destructive hover:text-destructive"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Submit */}
+      <Button
+        type="button"
+        className="w-full"
+        onClick={handleSubmit}
+        disabled={
+          !name.trim() ||
+          !frequencia ||
+
+          entries.length === 0 ||
+          entries.some(e => e.protocolId === 0 || e.quantity < 1)
+        }
+      >
+        Salvar pacote
+      </Button>
     </div>
   );
 }

@@ -1,9 +1,11 @@
 import CustomerForm from '@/components/customer/CustomerForm';
 import { useEffect, useState } from 'react';
+import { Eye, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { getCustomers, createCustomer, deleteCustomer, updateCustomer } from '@/api/customerApi';
+import { getCustomers, createCustomer, deleteCustomer, updateCustomer, searchCustomer } from '@/api/customerApi';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import type { Customer, CustomerRequest } from '@/types/index.ts';
@@ -22,6 +24,7 @@ import {
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [search, setSearch] = useState('');
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [customerToEdit, setCustomerToEdit] = useState<Customer | null>(null);
@@ -40,12 +43,23 @@ export default function CustomersPage() {
     }
   }
 
+  async function handleSearch(term: string) {
+    setSearch(term);
+    if (!term.trim()) { load(); return; }
+    try {
+      const data = await searchCustomer(term);
+      setCustomers(data);
+    } catch {
+      toast.error('Erro ao buscar clientes');
+    }
+  }
+
   async function handleCreate(data: CustomerRequest) {
     try {
-      await createCustomer(data);
+      const created = await createCustomer(data);
       toast.success('Cliente criado');
       setOpen(false);
-      load();
+      navigate(`/customers/${created.id}`);
     } catch {
       toast.error('Erro ao criar cliente');
     }
@@ -82,7 +96,7 @@ export default function CustomersPage() {
           <DialogTrigger asChild>
             <Button>Novo Cliente</Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Novo cliente</DialogTitle>
             </DialogHeader>
@@ -90,6 +104,17 @@ export default function CustomersPage() {
           </DialogContent>
         </Dialog>
       </div>
+
+            {/* Busca */}
+            <div className="relative">
+              <Search size={16} className="absolute left-3 top-3 text-gray-400" />
+              <Input
+                className="pl-9"
+                placeholder="Buscar por nome..."
+                value={search}
+                onChange={e => handleSearch(e.target.value)}
+              />
+            </div>
 
       <div className="bg-white rounded-lg border">
         <Table>
@@ -99,6 +124,7 @@ export default function CustomersPage() {
               <TableHead>Email</TableHead>
               <TableHead>Telefone</TableHead>
               <TableHead>Endereço</TableHead>
+              <TableHead></TableHead>
               <TableHead>Pets</TableHead>
               <TableHead></TableHead>
             </TableRow>
@@ -110,6 +136,10 @@ export default function CustomersPage() {
                 <TableCell onClick={() => navigate(`/customers/${c.id}`)}>{c.email}</TableCell>
                 <TableCell onClick={() => navigate(`/customers/${c.id}`)}>{c.phone}</TableCell>
                 <TableCell onClick={() => navigate(`/customers/${c.id}`)}>{c.address}</TableCell>
+                <TableCell onClick={() => navigate(`/customers/${c.id}`)}>
+                <Eye className="w-5 h-5 text-gray-400 pointer-events-none" />
+                </TableCell>
+
                 <TableCell onClick={() => navigate(`/customers/${c.id}`)}>{c.pets.length}</TableCell>
                 <TableCell>
                   <div className="flex gap-2">
@@ -156,7 +186,7 @@ export default function CustomersPage() {
       </div>
 
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Editar</DialogTitle>
           </DialogHeader>
@@ -167,6 +197,7 @@ export default function CustomersPage() {
               email: customerToEdit.email,
               phone: customerToEdit.phone,
               address: customerToEdit.address,
+              obs: customerToEdit.obs,
               cpf: customerToEdit.cpf,
             } : undefined}
           />

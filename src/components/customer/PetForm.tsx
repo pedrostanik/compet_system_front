@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import type { PetRequest } from '@/types/index.ts';
+import type { PetRequest, Pack } from '@/types/index.ts';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { getSpecies, getCoatTypes, getDogBreeds, getCatBreeds, type EnumOption } from '@/api/enumApi';
+import { getPacks } from '@/api/packApi';
 
 interface Props {
   onSubmit: (data: PetRequest) => void;
@@ -14,9 +15,11 @@ export default function PetForm({ onSubmit, initial }: Props) {
   const [species, setSpecies] = useState<EnumOption[]>([]);
   const [coatTypes, setCoatTypes] = useState<EnumOption[]>([]);
   const [breeds, setBreeds] = useState<EnumOption[]>([]);
+  const [packs, setPacks] = useState<Pack[]>([]);
 
   const [form, setForm] = useState<PetRequest>({
     name: initial?.name ?? '',
+    birthday: initial?.birthday ?? '',
     age: initial?.age ?? 0,
     species: initial?.species ?? '',
     race: initial?.race ?? '',
@@ -31,6 +34,8 @@ export default function PetForm({ onSubmit, initial }: Props) {
     weight: initial?.weight ?? undefined,
     coatType: initial?.coatType ?? '',
     observations: initial?.observations ?? '',
+    packId: initial?.packId ?? undefined,
+    packagePrice: initial?.packagePrice ?? undefined,
   });
 
     useEffect(() => {
@@ -42,6 +47,7 @@ export default function PetForm({ onSubmit, initial }: Props) {
   useEffect(() => {
     getSpecies().then(setSpecies);
     getCoatTypes().then(setCoatTypes);
+    getPacks().then(setPacks).catch(() => {});
   }, []);
 
      // 3. Carrega raças dinamicamente
@@ -50,6 +56,13 @@ export default function PetForm({ onSubmit, initial }: Props) {
            loadBreeds(form.species);
          }
        }, [form.species]);
+
+        // 4. Carrega idade dinamicamente
+          useEffect(() => {
+            if (form.birthday) {
+              calculateAge(form.birthday);
+            }
+          }, [form.birthday]);
 
     async function loadBreeds(specieName: string) {
         // Como agora usamos @JsonValue, comparamos com o label amigável
@@ -64,6 +77,24 @@ export default function PetForm({ onSubmit, initial }: Props) {
           setBreeds([]);
         }
       }
+
+      async function calculateAge(birthday: string) {
+          const birthDate = new Date(birthday);
+              const today = new Date();
+
+              if (isNaN(birthDate.getTime())) return;
+
+              // Diferença em milissegundos
+              const diffTime = today.getTime() - birthDate.getTime();
+
+              // Converte para anos totais incluindo os dias quebrados do ano (considerando ano bissexto/média de 365.25 dias)
+              const diffYears = diffTime / (1000 * 60 * 60 * 24 * 365.25);
+
+              // Arredonda para 1 casa decimal (ex: 1.5, 2.3)
+              const ageFloat = Math.max(0, Number(diffYears.toFixed(1)));
+
+              setForm(f => ({ ...f, age: ageFloat }));
+        }
 
   function handle(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name, value, type } = e.target as HTMLInputElement;
@@ -80,17 +111,38 @@ export default function PetForm({ onSubmit, initial }: Props) {
     }
   }
 
-  return (
-    <div className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto pr-1">
+  function handlePackChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const value = e.target.value;
+    setForm(f => ({ ...f, packId: value ? Number(value) : undefined }));
+  }
 
-      <div className="grid grid-cols-2 gap-4">
+// Função que lida com o envio nativo do formulário
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    console.log('ENVIANDO FORM:', JSON.stringify(form, null, 2));
+    onSubmit(form);
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto pr-1">
+
+      <div className="flex flex-col gap-4">
+        {/* Linha 1: Nome ocupando tudo ou dividido */}
         <div>
           <Label>Nome</Label>
-          <Input name="name" value={form.name} onChange={handle} />
+          <Input name="name" value={form.name} onChange={handle} required />
         </div>
-        <div>
-          <Label>Idade (anos)</Label>
-          <Input name="age" type="number" value={form.age} onChange={handle} />
+
+        {/* Linha 2: Data de Nascimento e Idade dividindo a mesma linha (2 colunas) */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label>Data de Nascimento</Label>
+            <Input name="birthday" value={form.birthday} onChange={handle} type="date" required />
+          </div>
+          <div>
+            <Label>Idade (anos)</Label>
+            <Input name="age" type="number" value={form.age} onChange={handle} required />
+          </div>
         </div>
       </div>
 
@@ -102,12 +154,14 @@ export default function PetForm({ onSubmit, initial }: Props) {
             value={form.species}
             onChange={handle}
             className="w-full border rounded-md px-3 py-2 text-sm"
+            required
           >
             <option value="" disabled>Selecione</option>
             {species.map(s => (
               <option key={s.value} value={s.value}>{s.label}</option>
             ))}
           </select>
+
         </div>
 
         <div>
@@ -118,6 +172,7 @@ export default function PetForm({ onSubmit, initial }: Props) {
               value={form.race}
               onChange={handle}
               className="w-full border rounded-md px-3 py-2 text-sm"
+              required
             >
               <option value="" disabled>Selecione a raça</option>
               {breeds.map(b => (
@@ -133,13 +188,14 @@ export default function PetForm({ onSubmit, initial }: Props) {
               disabled={!form.species}
             />
           )}
+
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label>Peso (kg)</Label>
-          <Input name="weight" type="number" step="0.1" value={form.weight ?? ''} onChange={handle} />
+          <Input name="weight" type="number" step="0.1" value={form.weight ?? ''} onChange={handle} required />
         </div>
         <div>
           <Label>Tipo de pelo</Label>
@@ -148,12 +204,14 @@ export default function PetForm({ onSubmit, initial }: Props) {
             value={form.coatType}
             onChange={handle}
             className="w-full border rounded-md px-3 py-2 text-sm"
+            required
           >
             <option value="" disabled>Selecione</option>
             {coatTypes.map(c => (
               <option key={c.value} value={c.value}>{c.label}</option>
             ))}
           </select>
+
         </div>
       </div>
 
@@ -204,12 +262,44 @@ export default function PetForm({ onSubmit, initial }: Props) {
         <Input name="healthIssues" value={form.healthIssues ?? ''} onChange={handle} />
       </div>
 
+      <p className="text-sm font-medium text-gray-600 mt-1">Pacote (opcional)</p>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label>Pacote</Label>
+          <select
+            name="packId"
+            value={form.packId ?? ''}
+            onChange={handlePackChange}
+            className="w-full border rounded-md px-3 py-2 text-sm"
+          >
+            <option value="">Nenhum</option>
+            {packs.map(p => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <Label>Preço do pacote (R$)</Label>
+          <Input
+            name="packagePrice"
+            type="number"
+            min={0}
+            step={0.01}
+            placeholder="0,00"
+            value={form.packagePrice ?? ''}
+            onChange={handle}
+          />
+        </div>
+      </div>
+
       <div>
         <Label>Observações</Label>
         <Input name="observations" value={form.observations ?? ''} onChange={handle} />
       </div>
 
-      <Button onClick={() => onSubmit(form)}>Salvar</Button>
-    </div>
+      <Button type="submit">Salvar</Button>
+
+    </form>
   );
 }

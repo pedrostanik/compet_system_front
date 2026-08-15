@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import PackForm from '@/components/pack/PackForm';
 
+
 export default function PackPage() {
   const [packs, setPacks] = useState<Pack[]>([]);
   const [open, setOpen] = useState(false);
@@ -81,17 +82,19 @@ export default function PackPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Cliente</TableHead>
-              <TableHead>Pet</TableHead>
+              <TableHead>Nome</TableHead>
+              <TableHead>Frequência</TableHead>
+              <TableHead>Início</TableHead>
               <TableHead>Serviços</TableHead>
+              <TableHead>Preço base</TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {packs.map(p => (
               <TableRow key={p.id}>
-                <TableCell>{p.customerName}</TableCell>
-                <TableCell>{p.petName}</TableCell>
+                <TableCell>{p.name}</TableCell>
+                <TableCell>{p.frequencia}</TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-1">
                     {p.protocols.map(pp => (
@@ -99,7 +102,7 @@ export default function PackPage() {
                         key={pp.protocolId}
                         className="text-xs bg-gray-100 rounded px-2 py-0.5"
                       >
-                        {pp.protocolName}
+                        {pp.protocolName} x{pp.quantity}
                       </span>
                     ))}
                   </div>
@@ -139,11 +142,12 @@ export default function PackPage() {
           <PackForm
             onSubmit={handleEdit}
             initial={packToEdit ? {
-              customerId: packToEdit.customerId,
-              customerName: packToEdit.customerName,
-              petId: packToEdit.petId,
-              petName: packToEdit.petName,
-              protocolIds: packToEdit.protocols.map(pp => pp.protocolId),
+              name: packToEdit.name,
+              frequencia: packToEdit.frequencia,
+              protocols: packToEdit.protocols.map(pp => ({
+                protocolId: pp.protocolId,
+                quantity: pp.quantity,
+              })),
             } : undefined}
           />
         </DialogContent>

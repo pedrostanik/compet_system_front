@@ -1,27 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Nunito+Sans:wght@400;500;600;700&display=swap');
+
 @import "tailwindcss";
 
-body {
-  margin: 0;
-  background-color: white;
-  color: #111;
+@theme {
+  --color-primary: #E86725;
+  --color-primary-foreground: #ffffff;
+
+  --color-brand-orange: #E86725;
+  --color-brand-orange-light: #F2935A;
+  --color-brand-orange-dark: #C4531A;
+  --color-brand-yellow: #F7B52C;
+  --color-brand-yellow-light: #FAD06B;
+  --color-brand-green: #3A4B27;
+  --color-brand-green-mid: #65793F;
+  --color-brand-green-light: #8FA05C;
+
+  --color-ui-bg: #F7F5F0;
+  --color-ui-border: #E5E2DA;
+  --color-ui-muted: #6B7280;
+
+  /* ===== Variáveis semânticas exigidas pelo shadcn/ui ===== */
+  --color-background: #FFFFFF;
+  --color-foreground: #1C1C1C;
+
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #1C1C1C;
+
+  --color-card: #FFFFFF;
+  --color-card-foreground: #1C1C1C;
+
+  --color-border: #E5E2DA;
+  --color-input: #E5E2DA;
+  --color-ring: #E86725;
+
+  --color-muted: #F7F5F0;
+  --color-muted-foreground: #6B7280;
+
+  --color-accent: #F7F5F0;
+  --color-accent-foreground: #1C1C1C;
+
+  --color-destructive: #DC2626;
+  --color-destructive-foreground: #FFFFFF;
+  /* ========================================================= */
+
+  --font-display: 'Nunito', sans-serif;
+  --font-body: 'Nunito Sans', sans-serif;
 }
 
 :root {
-  color-scheme: light;
+  --brand-orange:       #E86725;
+  --brand-orange-light: #F2935A;
+  --brand-orange-dark:  #C4531A;
+  --brand-yellow:       #F7B52C;
+  --brand-green:        #3A4B27;
+  --brand-green-mid:    #65793F;
+  --bg-main:            #F7F5F0;
+  --bg-white:           #FFFFFF;
+  --bg-sidebar:         #3A4B27;
+  --text-main:          #1C1C1C;
+  --text-muted:         #6B7280;
+  --border:             #E5E2DA;
 }
 
-[data-slot="dialog-content"] {
-  background-color: white !important;
-  color: #111 !important;
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'Nunito Sans', sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-main);
 }
 
-input, select, textarea {
-  background-color: white !important;
-  color: #111 !important;
-}
-
-[data-radix-popper-content-wrapper],
-[role="alertdialog"] {
-  background-color: white !important;
-  color: #111 !important;
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
 }
