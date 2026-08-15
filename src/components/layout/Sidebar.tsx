@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { House, Users, CalendarDays, Package, BarChart2, Menu, X, FileText, ShoppingBag, Receipt, LogOut } from 'lucide-react';
+import { House, Users, CalendarDays, Package, BarChart2, Menu, X, FileText, ShoppingBag, Receipt, LogOut, History } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 export default function Sidebar() {
@@ -16,6 +16,7 @@ export default function Sidebar() {
     { to: '/products',   icon: <ShoppingBag size={16} />,  label: 'Produtos' },
     { to: '/receipts',   icon: <Receipt size={16} />,      label: 'Recibos' },
     { to: '/report',     icon: <BarChart2 size={16} />,    label: 'Relatório' },
+    { to: '/history',    icon: <History size={16} />,      label: 'Histórico' },
 
   ];
 

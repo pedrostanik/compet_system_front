@@ -271,3 +271,10 @@ export interface AbsentCustomer {
   schedulingId: number;
 }
 
+export interface PetHistory {
+  time: string;
+  price: number;
+  duration: number;
+  observations?: string;
+}
+

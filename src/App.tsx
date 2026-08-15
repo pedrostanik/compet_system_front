@@ -13,6 +13,7 @@ import ReportPage from '@/pages/ReportPage';
 import ProtocolPage from '@/pages/ProtocolPage';
 import ProductsPage from '@/pages/ProductsPage';
 import ReceiptsPage from '@/pages/ReceiptsPage';
+import HistoryPage from '@/pages/HistoryPage';
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -42,6 +43,7 @@ export default function App() {
           <Route path="/report" element={<PrivateRoute><Layout><ReportPage /></Layout></PrivateRoute>} />
           <Route path="/products" element={<PrivateRoute><Layout><ProductsPage /></Layout></PrivateRoute>} />
           <Route path="/receipts" element={<PrivateRoute><Layout><ReceiptsPage /></Layout></PrivateRoute>} />
+          <Route path="/history" element={<PrivateRoute><Layout><HistoryPage /></Layout></PrivateRoute>} />
 
         </Routes>
         <Toaster />
