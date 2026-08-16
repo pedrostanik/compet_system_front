@@ -200,11 +200,23 @@
             </div>
           )}
 
-          {selectedPet && selectedPet.observations && (
-              <div className="border border-yellow-200 bg-yellow-50 rounded-md px-3 py-2">
-              <p className="text-xs font-medium text-yellow-800 mb-0.5">Observações do Pet</p>
-              <p className="text-sm text-yellow-700">{selectedPet.observations}</p>
-              </div>
+            {selectedPet && selectedPet.healthIssues && selectedPet.healthIssues !== 'Não' && (
+                <div className="border border-yellow-200 bg-yellow-50 rounded-md px-3 py-2">
+                <p className="text-xs font-medium text-yellow-800 mb-0.5">Saúde</p>
+                <p className="text-sm text-yellow-700">{selectedPet.healthIssues}</p>
+                </div>
+                )}
+            {selectedPet && selectedPet.allergy && selectedPet.allergy !== 'Não' && (
+                <div className="border border-yellow-200 bg-yellow-50 rounded-md px-3 py-2">
+                <p className="text-xs font-medium text-yellow-800 mb-0.5">Alergias</p>
+                <p className="text-sm text-yellow-700">{selectedPet.allergy}</p>
+                </div>
+                )}
+              {selectedPet && selectedPet.observations && (
+                  <div className="border border-yellow-200 bg-yellow-50 rounded-md px-3 py-2">
+                  <p className="text-xs font-medium text-yellow-800 mb-0.5">Observações do Pet</p>
+                  <p className="text-sm text-yellow-700">{selectedPet.observations}</p>
+                  </div>
               )}
 
           {/* Card de pacote vigente */}

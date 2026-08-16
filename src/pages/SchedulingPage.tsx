@@ -287,6 +287,24 @@ async function handleEdit(data: SchedulingRequest, activePackId?: number) {
 
         <p><span className="text-gray-500">Pet:</span> {selectedEvent.resource.petName}</p>
 
+
+        {/* Saúde do pet */}
+        {selectedPetDetail?.healthIssues && selectedPetDetail?.healthIssues !== 'Não' && (
+          <div className="border border-green-200 bg-green-50 rounded-md px-3 py-2 mt-1">
+            <p className="text-xs font-medium text-green-800 mb-0.5">Saúde</p>
+            <p className="text-sm text-green-700">{selectedPetDetail.healthIssues}</p>
+          </div>
+        )}
+
+        {/* Alergia do pet */}
+        {selectedPetDetail?.allergy && selectedPetDetail?.allergy !== 'Não' && (
+          <div className="border border-red-200 bg-red-50 rounded-md px-3 py-2 mt-1">
+            <p className="text-xs font-medium text-red-800 mb-0.5">Alergia</p>
+            <p className="text-sm text-red-700">{selectedPetDetail.healthIssues}</p>
+          </div>
+        )}
+
+
         {/* Observação do pet */}
         {selectedPetDetail?.observations && (
           <div className="border border-blue-200 bg-blue-50 rounded-md px-3 py-2 mt-1">

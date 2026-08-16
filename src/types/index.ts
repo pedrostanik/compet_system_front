@@ -277,4 +277,8 @@ export interface PetHistory {
   duration: number;
   observations?: string;
 }
+export interface FrequencyPoint {
+  date: string;
+  count: number;
+}
 
