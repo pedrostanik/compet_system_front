@@ -3,6 +3,7 @@ import type { ProtocolRequest } from '@/types/index.ts';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { useSubmitGuard } from '@/hooks/useSubmitGuard';
 
 interface Props {
   onSubmit: (data: ProtocolRequest) => void;
@@ -13,6 +14,10 @@ export default function ProtocolForm({ onSubmit, initial }: Props) {
   const [form, setForm] = useState<ProtocolRequest>(
     initial ?? { name: '', description: '' }
   );
+
+  const [guardedSubmit, isSubmitting] = useSubmitGuard(async (data: ProtocolRequest) => {
+    await onSubmit(data);
+  });
 
   function handle(e: React.ChangeEvent<HTMLInputElement>) {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }));
@@ -29,7 +34,9 @@ export default function ProtocolForm({ onSubmit, initial }: Props) {
         <Input name="description" value={form.description} onChange={handle} />
       </div>
 
-      <Button onClick={() => onSubmit(form)}>Save</Button>
+      <Button onClick={() => guardedSubmit(form)} disabled={isSubmitting}>
+        {isSubmitting ? 'Salvando...' : 'Save'}
+      </Button>
     </div>
   );
 }

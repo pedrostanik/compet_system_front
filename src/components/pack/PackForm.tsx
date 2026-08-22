@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Trash2, Plus } from 'lucide-react';
+import { useSubmitGuard } from '@/hooks/useSubmitGuard';
 
 interface PackProtocolEntry {
   protocolId: number;
@@ -37,6 +38,10 @@ export default function PackForm({ onSubmit, initial }: Props) {
     initial?.protocols ?? []
   );
 
+  const [guardedSubmit, isSubmitting] = useSubmitGuard(async (data: PackRequest) => {
+    await onSubmit(data);
+  });
+
   useEffect(() => {
     getProtocols().then(setProtocols).catch(() => {});
   }, []);
@@ -60,7 +65,7 @@ export default function PackForm({ onSubmit, initial }: Props) {
     if (!frequencia) return;
     if (entries.some(e => e.protocolId === 0 || e.quantity < 1)) return;
 
-    onSubmit({
+    guardedSubmit({
       name,
       frequencia,
       protocols: entries,
@@ -171,19 +176,19 @@ export default function PackForm({ onSubmit, initial }: Props) {
       </div>
 
       {/* Submit */}
-      <Button
+        <Button
         type="button"
         className="w-full"
         onClick={handleSubmit}
         disabled={
+          isSubmitting ||
           !name.trim() ||
           !frequencia ||
-
           entries.length === 0 ||
           entries.some(e => e.protocolId === 0 || e.quantity < 1)
         }
       >
-        Salvar pacote
+        {isSubmitting ? 'Salvando...' : 'Salvar pacote'}
       </Button>
     </div>
   );

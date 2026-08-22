@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Trash2, Plus } from 'lucide-react';
+import { useSubmitGuard } from '@/hooks/useSubmitGuard';
 
 interface Props {
   type: ReceiptType;
@@ -34,6 +35,10 @@ export default function ReceiptForm({
     discount: 0,
     items: [{ ...EMPTY_ITEM }],
   });
+
+    const [guardedSubmit, isSubmitting] = useSubmitGuard(async (data: ReceiptRequest) => {
+      await onSubmit(data);
+    });
 
   const subtotal = form.items.reduce((acc, i) => acc + i.quantity * i.unitPrice, 0);
   const total = subtotal - (form.discount ?? 0);
@@ -233,7 +238,13 @@ export default function ReceiptForm({
         />
       </section>
 
-      <Button onClick={() => onSubmit(form)} className="w-full">Gerar recibo</Button>
+       <Button
+              onClick={() => guardedSubmit(form)}
+              disabled={isSubmitting}
+              className="w-full"
+            >
+              {isSubmitting ? 'Gerando...' : 'Gerar recibo'}
+            </Button>
     </div>
   );
 }

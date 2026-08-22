@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { getSpecies, getCoatTypes, getDogBreeds, getCatBreeds, type EnumOption } from '@/api/enumApi';
 import { getPacks } from '@/api/packApi';
+import { useSubmitGuard } from '@/hooks/useSubmitGuard';
 
 interface Props {
   onSubmit: (data: PetRequest) => void;
@@ -36,6 +37,10 @@ export default function PetForm({ onSubmit, initial }: Props) {
     observations: initial?.observations ?? '',
     packId: initial?.packId ?? undefined,
     packagePrice: initial?.packagePrice ?? undefined,
+  });
+
+  const [guardedSubmit, isSubmitting] = useSubmitGuard(async (data: PetRequest) => {
+    await onSubmit(data);
   });
 
     useEffect(() => {
@@ -119,8 +124,7 @@ export default function PetForm({ onSubmit, initial }: Props) {
 // Função que lida com o envio nativo do formulário
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    console.log('ENVIANDO FORM:', JSON.stringify(form, null, 2));
-    onSubmit(form);
+    guardedSubmit(form);
   }
 
   return (
@@ -298,7 +302,9 @@ export default function PetForm({ onSubmit, initial }: Props) {
         <Input name="observations" value={form.observations ?? ''} onChange={handle} />
       </div>
 
-      <Button type="submit">Salvar</Button>
+       <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Salvando...' : 'Salvar'}
+       </Button>
 
     </form>
   );

@@ -17,6 +17,7 @@
       AlertDialogHeader,
       AlertDialogTitle,
     } from '@/components/ui/alert-dialog';
+    import { useSubmitGuard } from '@/hooks/useSubmitGuard';
 
     interface Props {
       onSubmit: (data: SchedulingRequest, activePackId?: number) => void;
@@ -50,6 +51,11 @@
         price: initial?.price ?? 60,
       });
 
+      const [guardedSubmit, isSubmitting] = useSubmitGuard(
+        async (data: SchedulingRequest, activePackId?: number) => {
+          await onSubmit(data, activePackId);
+        }
+      );
       useEffect(() => {
         getCustomers().then(setCustomers);
         getProtocols().then(setProtocols);
@@ -147,17 +153,17 @@
             setConfirmOpen(true);
             return;
           }
-          onSubmit(form, undefined);
+          guardedSubmit(form, undefined);
         }
 
       function handleConfirmSingle() {
         setConfirmOpen(false);
-        onSubmit(form, undefined); // agendamento avulso, não entra no ciclo do pacote
+        guardedSubmit(form, undefined); // agendamento avulso, não entra no ciclo do pacote
       }
 
       function handleConfirmPackage() {
         setConfirmOpen(false);
-        onSubmit(form, activePack?.id); // entra no ciclo, backend cria os próximos
+        guardedSubmit(form, activePack?.id); // entra no ciclo, backend cria os próximos
       }
 
       return (
@@ -370,29 +376,31 @@
                  </div>
 
 
-          <Button type="submit">Salvar</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? 'Salvando...' : 'Salvar'}
+                </Button>
 
         <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Agendamento de pacote</AlertDialogTitle>
-              <AlertDialogDescription>
-                Este pet possui o pacote <strong>{activePack?.name}</strong> ({activePack?.frequencia}).
-                Você pode aplicar esta alteração apenas a este agendamento, ou a todo o ciclo
-                do pacote (o que criará os próximos agendamentos automaticamente).
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <Button variant="outline" onClick={handleConfirmSingle}>
-                Somente este agendamento
-              </Button>
-              <AlertDialogAction onClick={handleConfirmPackage}>
-                Aplicar ao pacote
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-        </form>
-      );
-    }
+               <AlertDialogContent>
+                 <AlertDialogHeader>
+                   <AlertDialogTitle>Agendamento de pacote</AlertDialogTitle>
+                   <AlertDialogDescription>
+                     Este pet possui o pacote <strong>{activePack?.name}</strong> ({activePack?.frequencia}).
+                     Você pode aplicar esta alteração apenas a este agendamento, ou a todo o ciclo
+                     do pacote (o que criará os próximos agendamentos automaticamente).
+                   </AlertDialogDescription>
+                 </AlertDialogHeader>
+                 <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                   <AlertDialogCancel disabled={isSubmitting}>Cancelar</AlertDialogCancel>
+                   <Button variant="outline" onClick={handleConfirmSingle} disabled={isSubmitting}>
+                     {isSubmitting ? 'Salvando...' : 'Somente este agendamento'}
+                   </Button>
+                   <AlertDialogAction onClick={handleConfirmPackage} disabled={isSubmitting}>
+                     {isSubmitting ? 'Salvando...' : 'Aplicar ao pacote'}
+                   </AlertDialogAction>
+                 </AlertDialogFooter>
+               </AlertDialogContent>
+             </AlertDialog>
+           </form>
+         );
+       }

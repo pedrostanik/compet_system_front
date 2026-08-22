@@ -3,6 +3,7 @@ import type { CustomerRequest } from '@/types/index.ts';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { useSubmitGuard } from '@/hooks/useSubmitGuard';
 
 interface Props {
   onSubmit: (data: CustomerRequest) => void;
@@ -19,14 +20,17 @@ export default function CustomerForm({ onSubmit, initial }: Props) {
     obs: initial?.obs ?? '',
   });
 
+  const [guardedSubmit, isSubmitting] = useSubmitGuard(async (data: CustomerRequest) => {
+    await onSubmit(data);
+  });
+
   function handle(e: React.ChangeEvent<HTMLInputElement>) {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }));
   }
 
-// Função disparada quando o form é submetido nativamente
   function handleSubmit(e: React.FormEvent) {
-    e.preventDefault(); // Evita o reload da página
-    onSubmit(form);     // Só roda se todos os campos 'required' estiverem preenchidos!
+    e.preventDefault();
+    guardedSubmit(form);
   }
 
   return (
@@ -55,7 +59,9 @@ export default function CustomerForm({ onSubmit, initial }: Props) {
              <Label>Observações</Label>
              <Input name="obs" value={form.obs ?? ''} onChange={handle} />
           </div>
-          <Button type="submit">Salvar</Button>
+                 <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting ? 'Salvando...' : 'Salvar'}
+                 </Button>
       </form>
   );
 }

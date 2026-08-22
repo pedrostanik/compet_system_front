@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useSubmitGuard } from '@/hooks/useSubmitGuard';
 
 interface Props {
   onSubmit: (data: ProductRequest) => void;
@@ -50,6 +51,10 @@ const UNIT_OPTIONS = ['UN', 'KG', 'LT', 'CX', 'PCT', 'ML', 'G'];
 export default function ProductForm({ onSubmit, initial }: Props) {
   const [form, setForm] = useState<ProductRequest>({ ...EMPTY, ...initial });
 
+    const [guardedSubmit, isSubmitting] = useSubmitGuard(async (data: ProductRequest) => {
+      await onSubmit(data);
+    });
+
   const margin =
     form.costPrice !== '' && form.salePrice !== '' && Number(form.salePrice) > 0
       ? (((Number(form.salePrice) - Number(form.costPrice)) / Number(form.salePrice)) * 100).toFixed(1)
@@ -67,6 +72,10 @@ export default function ProductForm({ onSubmit, initial }: Props) {
   function handle(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value, type, checked } = e.target;
     setForm(f => ({ ...f, [name]: type === 'checkbox' ? checked : value }));
+  }
+
+  function handleSubmit() {
+    guardedSubmit(form);
   }
 
   return (
@@ -258,7 +267,9 @@ export default function ProductForm({ onSubmit, initial }: Props) {
         </div>
       </section>
 
-      <Button onClick={() => onSubmit(form)} className="w-full">Salvar</Button>
+          <Button onClick={handleSubmit} disabled={isSubmitting} className="w-full">
+             {isSubmitting ? 'Salvando...' : 'Salvar'}
+           </Button>
     </div>
   );
 }
