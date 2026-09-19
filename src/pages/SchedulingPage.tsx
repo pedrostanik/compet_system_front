@@ -11,6 +11,7 @@ import {
   createFutureFromPack,
   updateFutureFromPack,
   deleteScheduling,
+  getFuturePacks,
   updateSchedulingTime,
   changeStatus,
   type SchedulingResponse,
@@ -111,6 +112,16 @@ export default function SchedulingPage() {
       }
       fetchDetails();
     }, [selectedEvent]);
+
+
+useEffect(() => {
+  console.log("SELECTED EVENT:", selectedEvent);
+  console.log("RESOURCE:", selectedEvent?.resource);
+  console.log("packCycle:", selectedEvent?.resource.packCycle);
+  console.log("isPackage:", selectedEvent?.resource.isPackage);
+  console.log("packId:", selectedEvent?.resource.packId);
+  console.log("selectedPack:", selectedPack);
+}, [selectedEvent, selectedPack]);
 
   async function load() {
     try {
@@ -300,7 +311,7 @@ async function handleEdit(data: SchedulingRequest, activePackId?: number) {
         {selectedPetDetail?.allergy && selectedPetDetail?.allergy !== 'Não' && (
           <div className="border border-red-200 bg-red-50 rounded-md px-3 py-2 mt-1">
             <p className="text-xs font-medium text-red-800 mb-0.5">Alergia</p>
-            <p className="text-sm text-red-700">{selectedPetDetail.healthIssues}</p>
+            <p className="text-sm text-red-700">{selectedPetDetail.allergy}</p>
           </div>
         )}
 

@@ -24,6 +24,7 @@
       // packCycle não faz parte do SchedulingRequest (é calculado pelo backend),
       // mas pode vir no initial ao editar um agendamento já existente, só para exibição.
       initial?: Partial<SchedulingRequest> & { packCycle?: number };
+      
     }
 
     export default function SchedulingForm({ onSubmit, initial }: Props) {
@@ -367,6 +368,7 @@
                          name="price"
                          type="number"
                          min={0}
+                         step="0.01"
                          value={form.price}
                          disabled={!!activePack}
                          readOnly={!!activePack}

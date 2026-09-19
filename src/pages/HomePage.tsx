@@ -11,8 +11,8 @@ import {
   isWithinInterval,
 } from 'date-fns';
 import { getSchedulings } from '@/api/schedulingApi';
-import { getReceipts } from '@/api/receiptApi';
-import type { SchedulingResponse, ReceiptResponse } from '@/types';
+// import { getReceipts } from '@/api/receiptApi';
+import type { SchedulingResponse } from '@/types';
 
 /* Mesma convenção do calendário (SchedulingPage): semana começa no domingo. */
 const WEEK_OPTS = { weekStartsOn: 0 } as const;
@@ -30,7 +30,7 @@ function inRange(iso: string | undefined, range: Range) {
 
 export default function HomePage() {
   const [schedulings, setSchedulings] = useState<SchedulingResponse[]>([]);
-  const [receipts, setReceipts] = useState<ReceiptResponse[]>([]);
+  //const [receipts, setReceipts] = useState<ReceiptResponse[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,13 +38,12 @@ export default function HomePage() {
 
     (async () => {
       try {
-        const [schedulingData, receiptData] = await Promise.all([
+        const [schedulingData] = await Promise.all([
           getSchedulings(),
-          getReceipts(),
         ]);
         if (!active) return;
         setSchedulings(schedulingData);
-        setReceipts(receiptData);
+       // setReceipts(receiptData);
       } catch {
         if (active) toast.error('Erro ao carregar os dados do painel');
       } finally {
@@ -76,11 +75,11 @@ export default function HomePage() {
   const lastWeekSchedules = confirmed.filter(s => inRange(s.time, lastWeek)).length;
 
   /* Faturamento = recibos efetivamente pagos. */
-  const paid = receipts.filter(r => r.status === 'PAID');
-  const sumTotal = (rows: ReceiptResponse[]) =>
-    rows.reduce((total, r) => total + Number(r.total ?? 0), 0);
-  const weekRevenue = sumTotal(paid.filter(r => inRange(r.createdAt, thisWeek)));
-  const monthRevenue = sumTotal(paid.filter(r => inRange(r.createdAt, thisMonth)));
+  const paid = schedulings.filter(r => r.scheduleStatus === 'HAPPENED');
+  const sumTotal = (rows: SchedulingResponse[]) =>
+    rows.reduce((total, r) => total + Number(r.price ?? 0), 0);
+  const weekRevenue = sumTotal(paid.filter(r => inRange(r.time, thisWeek)));
+  const monthRevenue = sumTotal(paid.filter(r => inRange(r.time, thisMonth)));
 
   const delta = weekSchedules - lastWeekSchedules;
 

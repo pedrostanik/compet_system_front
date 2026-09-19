@@ -27,8 +27,11 @@ export const updateSchedulingTime = (id: number, data: SchedulingRequest) =>
 export const changeStatus = (id: number, status: string) =>
    api.patch<SchedulingResponse>(`/api/scheduling/${id}/${status}`).then(r => r.data);
 
+export const getFuturePacks = (id: number, packId: number) =>
+ api.get<SchedulingResponse[]>(`/api/scheduling/get-future-pack-schedules/${id}/${packId}`).then(r => r.data);
+
 export const createFutureFromPack = (data: FutureScheduleRequest) =>
   api.post<SchedulingResponse[]>('/api/scheduling/future-schedules', data).then(r => r.data);
 
-  export const updateFutureFromPack = (id: number, data: FutureScheduleRequest) =>
-    api.put<SchedulingResponse[]>(`/api/scheduling/${id}/future-schedules`, data).then(r => r.data);
+export const updateFutureFromPack = (id: number, data: FutureScheduleRequest) =>
+api.put<SchedulingResponse[]>(`/api/scheduling/${id}/future-schedules`, data).then(r => r.data);
