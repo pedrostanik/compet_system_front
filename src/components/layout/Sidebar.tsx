@@ -53,7 +53,7 @@ export default function Sidebar() {
             <div>
               <span className="font-black text-white text-lg tracking-tight"
                 style={{ fontFamily: 'Nunito, sans-serif' }}>
-                Com<span style={{ color: 'var(--brand-yellow)' }}> Pet</span>
+                Com<span style={{ color: 'var(--brand-yellow)' }}>Pet</span>
               </span>
               <p className="text-white/40 text-xs -mt-0.5">Petshop</p>
             </div>
