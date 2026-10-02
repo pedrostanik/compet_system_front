@@ -281,4 +281,3 @@ export interface FrequencyPoint {
   date: string;
   count: number;
 }
-

@@ -24,10 +24,10 @@
       // packCycle não faz parte do SchedulingRequest (é calculado pelo backend),
       // mas pode vir no initial ao editar um agendamento já existente, só para exibição.
       initial?: Partial<SchedulingRequest> & { packCycle?: number };
-      
+      onApplyToPackage?: (data: SchedulingRequest, activePack: Pack) => void;
     }
 
-    export default function SchedulingForm({ onSubmit, initial }: Props) {
+    export default function SchedulingForm({ onSubmit, initial, onApplyToPackage  }: Props) {
       const [customers, setCustomers] = useState<Customer[]>([]);
       const [protocols, setProtocols] = useState<Protocol[]>([]);
       const [packs, setPacks] = useState<Pack[]>([]);
@@ -164,6 +164,10 @@
 
       function handleConfirmPackage() {
         setConfirmOpen(false);
+          if (onApplyToPackage && activePack) {
+            onApplyToPackage(form, activePack);
+            return;
+          }
         guardedSubmit(form, activePack?.id); // entra no ciclo, backend cria os próximos
       }
 
@@ -388,8 +392,7 @@
                    <AlertDialogTitle>Agendamento de pacote</AlertDialogTitle>
                    <AlertDialogDescription>
                      Este pet possui o pacote <strong>{activePack?.name}</strong> ({activePack?.frequencia}).
-                     Você pode aplicar esta alteração apenas a este agendamento, ou a todo o ciclo
-                     do pacote (o que criará os próximos agendamentos automaticamente).
+                     Você pode aplicar esta alteração apenas a este agendamento, ou também editar datas futuras.
                    </AlertDialogDescription>
                  </AlertDialogHeader>
                  <AlertDialogFooter className="flex-col sm:flex-row gap-2">
@@ -398,7 +401,7 @@
                      {isSubmitting ? 'Salvando...' : 'Somente este agendamento'}
                    </Button>
                    <AlertDialogAction onClick={handleConfirmPackage} disabled={isSubmitting}>
-                     {isSubmitting ? 'Salvando...' : 'Aplicar ao pacote'}
+                     {isSubmitting ? 'Salvando...' : 'Alterar datas futuras'}
                    </AlertDialogAction>
                  </AlertDialogFooter>
                </AlertDialogContent>

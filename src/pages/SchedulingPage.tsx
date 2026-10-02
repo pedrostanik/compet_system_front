@@ -11,12 +11,14 @@ import {
   createFutureFromPack,
   updateFutureFromPack,
   deleteScheduling,
-  getFuturePacks,
   updateSchedulingTime,
+  getFuturePacks,
   changeStatus,
   type SchedulingResponse,
   type SchedulingRequest,
 } from '@/api/schedulingApi';
+import FuturePackSchedulingsPanel from '@/components/schedule/FuturePackSchedulingsPanel';
+import type { Pack } from '@/types/index.ts';
 import { getPack } from '@/api/packApi'
 import type { SchedulingProtocol, ScheduleStatus } from '@/types/index.ts';
 import { Button } from '@/components/ui/button';
@@ -59,6 +61,11 @@ export default function SchedulingPage() {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [selectedCustomerDetail, setSelectedCustomerDetail] = useState<Customer | null>(null);
   const [selectedPetDetail, setSelectedPetDetail] = useState<Pet | null>(null);
+  const [futurePanelOpen, setFuturePanelOpen] = useState(false);
+  const [futurePanelPackId, setFuturePanelPackId] = useState<number | null>(null);
+  const [futurePanelExcludeId, setFuturePanelExcludeId] = useState<number | undefined>(undefined);
+  const [futurePanelReferenceTime, setFuturePanelReferenceTime] = useState<string | undefined>(undefined);
+  const [futurePanelInitialItems, setFuturePanelInitialItems] = useState<SchedulingResponse[] | undefined>(undefined);
 
   useEffect(() => {
     async function fetchPackData() {
@@ -182,6 +189,34 @@ async function handleEdit(data: SchedulingRequest, activePackId?: number) {
     setEditOpen(false);
     setEventToEdit(null);
     load();
+  } catch {
+    toast.error('Erro ao atualizar agendamento');
+  }
+}
+
+async function handleApplyToPackage(data: SchedulingRequest, pack: Pack) {
+  if (!eventToEdit) return;
+  const oldTime = eventToEdit.resource.time;
+
+  try {
+    // busca os futuros ANTES de salvar a data nova — a API usa a data
+    // atual do agendamento como referência pro filtro, então se
+    // buscássemos depois, mover este agendamento pra depois dos outros
+    // faria a API não retornar mais nenhum
+    const futureItems = await getFuturePacks(eventToEdit.resource.id, pack.id);
+
+    await updateSchedulingTime(eventToEdit.resource.id, data);
+    toast.success('Agendamento atualizado');
+
+    setEditOpen(false);
+    setEventToEdit(null);
+    load();
+
+    setFuturePanelPackId(pack.id);
+    setFuturePanelExcludeId(eventToEdit.resource.id);
+    setFuturePanelReferenceTime(oldTime);
+    setFuturePanelInitialItems(futureItems.filter(i => i.id !== eventToEdit.resource.id));
+    setFuturePanelOpen(true);
   } catch {
     toast.error('Erro ao atualizar agendamento');
   }
@@ -396,6 +431,7 @@ async function handleEdit(data: SchedulingRequest, activePackId?: number) {
     </DialogHeader>
      <SchedulingForm
               onSubmit={handleEdit}
+              onApplyToPackage={handleApplyToPackage}
               initial={{
                 time: eventToEdit
                   ? format(eventToEdit.start, "yyyy-MM-dd'T'HH:mm")
@@ -412,6 +448,35 @@ async function handleEdit(data: SchedulingRequest, activePackId?: number) {
                 price: eventToEdit?.resource.price,
               }}
             />
+  </DialogContent>
+</Dialog>
+
+<Dialog
+  open={futurePanelOpen}
+  onOpenChange={(v) => {
+    setFuturePanelOpen(v);
+    if (!v) {
+      setFuturePanelPackId(null);
+      setFuturePanelExcludeId(undefined);
+      setFuturePanelReferenceTime(undefined);
+      setFuturePanelInitialItems(undefined);
+    }
+  }}
+>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Ajustar agendamentos futuros do pacote</DialogTitle>
+    </DialogHeader>
+    {futurePanelPackId != null && futurePanelExcludeId != null && futurePanelReferenceTime != null && (
+      <FuturePackSchedulingsPanel
+        packId={futurePanelPackId}
+        schedulingId={futurePanelExcludeId}
+        referenceTime={futurePanelReferenceTime}
+        initialItems={futurePanelInitialItems}
+        onClose={() => setFuturePanelOpen(false)}
+        onUpdated={load}
+      />
+    )}
   </DialogContent>
 </Dialog>
 

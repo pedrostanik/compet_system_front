@@ -1,0 +1,78 @@
+name: Deploy Web
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+# Never run two web deploys at once (concurrency groups are per-repository).
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: develop
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+        env:
+          VITE_API_URL: https://petshopcompet.com.br
+
+      - name: Package dist
+        run: tar -czf dist.tar.gz -C dist .
+
+      - name: Configure SSH
+        env:
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          EC2_KNOWN_HOSTS: ${{ secrets.EC2_KNOWN_HOSTS }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+        run: |
+          for v in EC2_SSH_KEY EC2_KNOWN_HOSTS EC2_HOST; do
+            [ -n "${!v}" ] || { echo "::error::Secret $v is empty or not visible to this job's environment"; exit 1; }
+          done
+          if ! grep -q "^$EC2_HOST " <<< "$EC2_KNOWN_HOSTS"; then
+            echo "::error::EC2_KNOWN_HOSTS has no entry for EC2_HOST (lines must start with the same host/IP)"; exit 1
+          fi
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$EC2_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$EC2_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Upload and publish
+        env:
+          TARGET: ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}
+        run: |
+          scp -i ~/.ssh/deploy_key dist.tar.gz "$TARGET":/tmp/petshop-web-dist.tar.gz
+          # nginx bind-mounts the dist directory itself, so it must be updated in
+          # place (rsync --delete) rather than swapped for a new directory.
+          # The previous build is kept in dist.prev for manual rollback.
+          ssh -i ~/.ssh/deploy_key "$TARGET" 'set -euo pipefail
+            cd /home/ubuntu/petshop/petshop-web
+            rm -rf dist.new && mkdir dist.new
+            tar -xzf /tmp/petshop-web-dist.tar.gz -C dist.new
+            test -f dist.new/index.html
+            mkdir -p dist
+            rsync -a --delete dist/ dist.prev/
+            rsync -a --delete dist.new/ dist/
+            rm -rf dist.new /tmp/petshop-web-dist.tar.gz
+            echo "Published $(find dist -type f | wc -l) files"'
+
+      - name: Smoke test
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' https://petshopcompet.com.br/)
+          echo "HTTP $code"
+          test "$code" = 200
+
+      - name: Clean up SSH key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
