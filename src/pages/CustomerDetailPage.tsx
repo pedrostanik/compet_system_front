@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { apiErrorMessage } from '@/api/errors';
 import { getCustomer, addPet, removePet, updatePet } from '@/api/customerApi';
 import type { Customer, Pet, PetRequest } from '@/types/index.ts';
 import { Button } from '@/components/ui/button';
@@ -37,8 +38,8 @@ export default function CustomerDetailPage() {
     try {
       const data = await getCustomer(Number(id));
       setCustomer(data);
-    } catch {
-      toast.error('Cliente não encontrado');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Cliente não encontrado'));
       navigate('/customers');
     }
   }
@@ -49,8 +50,8 @@ export default function CustomerDetailPage() {
       toast.success('Pet adicionado');
       setOpen(false);
       load();
-    } catch {
-      toast.error('Erro ao adicionar pet');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao adicionar pet'));
     }
   }
 
@@ -62,8 +63,8 @@ export default function CustomerDetailPage() {
       setEditPetOpen(false);
       setPetToEdit(null);
       load();
-    } catch {
-      toast.error('Erro ao atualizar pet');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao atualizar pet'));
     }
   }
 
@@ -72,8 +73,8 @@ export default function CustomerDetailPage() {
       await removePet(Number(id), petId);
       toast.success('Pet removido');
       load();
-    } catch {
-      toast.error('Erro ao remover pet');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao remover pet'));
     }
   }
 

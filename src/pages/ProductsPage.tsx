@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { apiErrorMessage } from '@/api/errors';
 import { Plus, Search, AlertTriangle, Package } from 'lucide-react';
 import {
   getProducts, createProduct, updateProduct,
@@ -26,8 +27,8 @@ export default function ProductsPage() {
     try {
       const data = await getProducts();
       setProducts(Array.isArray(data) ? data : []);
-    } catch {
-      toast.error('Erro ao carregar produtos');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao carregar produtos'));
     }
   }
 
@@ -37,8 +38,8 @@ export default function ProductsPage() {
     try {
       const data = await searchProducts(term);
       setProducts(data);
-    } catch {
-      toast.error('Erro ao buscar produtos');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao buscar produtos'));
     }
   }
 
@@ -49,8 +50,8 @@ export default function ProductsPage() {
       toast.success('Produto cadastrado');
       setCreateOpen(false);
       load();
-    } catch {
-      toast.error('Erro ao cadastrar produto');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao cadastrar produto'));
     } finally {
       setLoading(false);
     }
@@ -64,8 +65,8 @@ export default function ProductsPage() {
       toast.success('Produto atualizado');
       setEditTarget(null);
       load();
-    } catch {
-      toast.error('Erro ao atualizar produto');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao atualizar produto'));
     } finally {
       setLoading(false);
     }
@@ -76,8 +77,8 @@ export default function ProductsPage() {
       await deactivateProduct(id);
       toast.success('Produto desativado');
       load();
-    } catch {
-      toast.error('Erro ao desativar produto');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao desativar produto'));
     }
   }
 

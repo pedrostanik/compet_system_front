@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Eye, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { apiErrorMessage } from '@/api/errors';
 import { getCustomers, createCustomer, deleteCustomer, updateCustomer, searchCustomer } from '@/api/customerApi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,8 +39,8 @@ export default function CustomersPage() {
     try {
       const data = await getCustomers();
       setCustomers(data);
-    } catch {
-      toast.error('Failed to load customers');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Failed to load customers'));
     }
   }
 
@@ -49,8 +50,8 @@ export default function CustomersPage() {
     try {
       const data = await searchCustomer(term);
       setCustomers(data);
-    } catch {
-      toast.error('Erro ao buscar clientes');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao buscar clientes'));
     }
   }
 
@@ -60,8 +61,8 @@ export default function CustomersPage() {
       toast.success('Cliente criado');
       setOpen(false);
       navigate(`/customers/${created.id}`);
-    } catch {
-      toast.error('Erro ao criar cliente');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao criar cliente'));
     }
   }
 
@@ -70,8 +71,8 @@ export default function CustomersPage() {
       await deleteCustomer(id);
       toast.success('Cliente deletado');
       load();
-    } catch {
-      toast.error('Erro ao deletar cliente');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao deletar cliente'));
     }
   }
 
@@ -83,8 +84,8 @@ export default function CustomersPage() {
       setEditOpen(false);
       setCustomerToEdit(null);
       load();
-    } catch {
-      toast.error('Erro ao atualizar cliente');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao atualizar cliente'));
     }
   }
 

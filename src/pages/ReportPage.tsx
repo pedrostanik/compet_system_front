@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
+import { apiErrorMessage } from '@/api/errors';
 import { getReport, getAbsentCustomers } from '@/api/reportApi';
 import { Button } from '@/components/ui/button';
 import type { AbsentCustomer } from '@/types';
@@ -17,8 +18,8 @@ export default function ReportPage() {
     try {
       const data = await getReport();
       setReport(data);
-    } catch {
-      toast.error('Erro ao gerar relatório');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao gerar relatório'));
     } finally {
       setLoading(false);
     }
@@ -29,8 +30,8 @@ export default function ReportPage() {
     try {
       const data = await getAbsentCustomers();
       setAbsentCustomers(data);
-    } catch {
-      toast.error('Erro ao buscar clientes ausentes');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao buscar clientes ausentes'));
     } finally {
       setLoadingAbsent(false);
     }

@@ -1,6 +1,7 @@
 import ProtocolForm from '@/components/protocol/ProtocolForm';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { apiErrorMessage } from '@/api/errors';
 import { getProtocols, createProtocol, deleteProtocol, updateProtocol } from '@/api/protocolApi';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -21,8 +22,8 @@ export default function ProtocolPage() {
     try {
       const data = await getProtocols();
       setProtocols(data);
-    } catch {
-      toast.error('Failed to load protocol');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Failed to load protocol'));
     }
   }
 
@@ -32,8 +33,8 @@ export default function ProtocolPage() {
       toast.success('Protocolo criado');
       setOpen(false);
       load();
-    } catch {
-      toast.error('Erro ao criar protocol');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao criar protocol'));
     }
   }
 
@@ -42,8 +43,8 @@ export default function ProtocolPage() {
       await deleteProtocol(id);
       toast.success('Protocolo deletado');
       load();
-    } catch {
-      toast.error('Erro ao deletar protocolo');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao deletar protocolo'));
     }
   }
 
@@ -55,8 +56,8 @@ export default function ProtocolPage() {
       setEditOpen(false);
       setprotocolToEdit(null);
       load();
-    } catch {
-      toast.error('Erro ao atualizar protocolo');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao atualizar protocolo'));
     }
   }
 

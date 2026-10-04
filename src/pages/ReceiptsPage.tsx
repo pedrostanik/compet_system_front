@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { apiErrorMessage } from '@/api/errors';
 import { Plus, FileText, Download, MessageCircle, CheckCircle, XCircle } from 'lucide-react';
 import {
   getReceipts, createReceipt, markAsPaid,
@@ -36,8 +37,8 @@ export default function ReceiptsPage() {
     try {
       const data = await getReceipts();
       setReceipts(Array.isArray(data) ? data : []);
-    } catch {
-      toast.error('Erro ao carregar recibos');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao carregar recibos'));
     }
   }
 
@@ -47,8 +48,8 @@ export default function ReceiptsPage() {
       toast.success('Recibo criado');
       setCreateType(null);
       load();
-    } catch {
-      toast.error('Erro ao criar recibo');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao criar recibo'));
     }
   }
 
@@ -58,8 +59,8 @@ export default function ReceiptsPage() {
       toast.success('Recibo marcado como pago');
       setSelected(null);
       load();
-    } catch {
-      toast.error('Erro ao atualizar recibo');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao atualizar recibo'));
     }
   }
 
@@ -69,16 +70,16 @@ export default function ReceiptsPage() {
       toast.success('Recibo cancelado');
       setSelected(null);
       load();
-    } catch {
-      toast.error('Erro ao cancelar recibo');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao cancelar recibo'));
     }
   }
 
   async function handleDownload(receipt: ReceiptResponse) {
     try {
       await downloadPdf(receipt.id, receipt.number);
-    } catch {
-      toast.error('Erro ao gerar PDF');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao gerar PDF'));
     }
   }
 

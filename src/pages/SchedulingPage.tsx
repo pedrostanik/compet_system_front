@@ -5,6 +5,7 @@ import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { toast } from 'sonner';
+import { apiErrorMessage } from '@/api/errors';
 import {
   getSchedulings,
   createScheduling,
@@ -134,8 +135,8 @@ useEffect(() => {
     try {
       const data = await getSchedulings();
       setEvents(data.map(toEvent));
-    } catch {
-      toast.error('Erro ao carregar agendamentos');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao carregar agendamentos'));
     }
   }
 
@@ -167,8 +168,8 @@ useEffect(() => {
       }
       setOpen(false);
       load();
-    } catch {
-      toast.error('Erro ao criar agendamento');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao criar agendamento'));
     }
   }
 
@@ -189,8 +190,8 @@ async function handleEdit(data: SchedulingRequest, activePackId?: number) {
     setEditOpen(false);
     setEventToEdit(null);
     load();
-  } catch {
-    toast.error('Erro ao atualizar agendamento');
+  } catch (err) {
+    toast.error(apiErrorMessage(err, 'Erro ao atualizar agendamento'));
   }
 }
 
@@ -217,8 +218,8 @@ async function handleApplyToPackage(data: SchedulingRequest, pack: Pack) {
     setFuturePanelReferenceTime(oldTime);
     setFuturePanelInitialItems(futureItems.filter(i => i.id !== eventToEdit.resource.id));
     setFuturePanelOpen(true);
-  } catch {
-    toast.error('Erro ao atualizar agendamento');
+  } catch (err) {
+    toast.error(apiErrorMessage(err, 'Erro ao atualizar agendamento'));
   }
 }
 
@@ -228,8 +229,8 @@ async function handleApplyToPackage(data: SchedulingRequest, pack: Pack) {
       toast.success('Agendamento deletado');
       setSelectedEvent(null);
       load();
-    } catch {
-      toast.error('Erro ao deletar agendamento');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao deletar agendamento'));
     }
   }
 
@@ -242,8 +243,8 @@ async function handleApplyToPackage(data: SchedulingRequest, pack: Pack) {
       setSelectedEvent(prev =>
         prev ? { ...prev, resource: { ...prev.resource, scheduleStatus: typedStatus } } : null
       );
-    } catch {
-      toast.error('Erro ao atualizar agendamento');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao atualizar agendamento'));
     }
   }
 

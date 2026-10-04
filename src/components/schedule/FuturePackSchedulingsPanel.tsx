@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { apiErrorMessage } from '@/api/errors';
 import {
   getFuturePacks,
   updateSchedulingTime,
@@ -71,8 +72,8 @@ async function load() {
     );
     setItems(filtered);
     setPack(packData);
-  } catch {
-    toast.error('Erro ao carregar agendamentos futuros do pacote');
+  } catch (err) {
+    toast.error(apiErrorMessage(err, 'Erro ao carregar agendamentos futuros do pacote'));
   } finally {
     setLoading(false);
   }
@@ -128,8 +129,8 @@ async function handleConfirmAll() {
     setEditedTimes({});
     setEditingId(null);
     onClose?.();
-  } catch {
-    toast.error('Erro ao atualizar um ou mais agendamentos — confira a lista e tente novamente');
+  } catch (err) {
+    toast.error(apiErrorMessage(err, 'Erro ao atualizar um ou mais agendamentos — confira a lista e tente novamente'));
   } finally {
     if (succeeded.length > 0) {
       setItems(prev =>

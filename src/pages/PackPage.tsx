@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { apiErrorMessage } from '@/api/errors';
 import { getPacks, createPack, deletePack, updatePack } from '@/api/packApi';
 import type { Pack, PackRequest } from '@/types/index.ts';
 import { Button } from '@/components/ui/button';
@@ -22,8 +23,8 @@ export default function PackPage() {
     try {
       const data = await getPacks();
       setPacks(data);
-    } catch {
-      toast.error('Erro ao carregar pacotes');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao carregar pacotes'));
     }
   }
 
@@ -33,8 +34,8 @@ export default function PackPage() {
       toast.success('Pacote criado');
       setOpen(false);
       load();
-    } catch {
-      toast.error('Erro ao criar pacote');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao criar pacote'));
     }
   }
 
@@ -46,8 +47,8 @@ export default function PackPage() {
       setEditOpen(false);
       setPackToEdit(null);
       load();
-    } catch {
-      toast.error('Erro ao atualizar pacote');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao atualizar pacote'));
     }
   }
 
@@ -56,8 +57,8 @@ export default function PackPage() {
       await deletePack(id);
       toast.success('Pacote deletado');
       load();
-    } catch {
-      toast.error('Erro ao deletar pacote');
+    } catch (err) {
+      toast.error(apiErrorMessage(err, 'Erro ao deletar pacote'));
     }
   }
 
