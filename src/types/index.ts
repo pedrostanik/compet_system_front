@@ -10,7 +10,7 @@ export type ScheduleStatus = 'SCHEDULED' | 'CONFIRMED' | 'CANCELED' | 'HAPPENED'
 export interface Customer {
   id: number;
   name: string;
-  email: string;
+  email: string | null; // optional: many customers have no e-mail
   phone: string;
   cpf: string;
   address?: string;
@@ -20,7 +20,7 @@ export interface Customer {
 
 export interface CustomerRequest {
   name: string;
-  email: string;
+  email?: string;
   phone: string;
   cpf: string;
   address?: string;
@@ -280,4 +280,33 @@ export interface PetHistory {
 export interface FrequencyPoint {
   date: string;
   count: number;
+}
+
+// --- Accounts (Phase 1) ---
+
+/** OWNER: everything · ADMIN: all but owner accounts · STAFF: no receipts/reports/users · VIEWER: read-only */
+export type Role = 'OWNER' | 'ADMIN' | 'STAFF' | 'VIEWER';
+
+export interface Me {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  mustChangePassword: boolean;
+}
+
+export interface Session {
+  accessToken: string;
+  expiresIn: number;
+  user: Me;
+}
+
+export interface UserAccount {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  status: 'ACTIVE' | 'DISABLED';
+  mustChangePassword: boolean;
+  lastLoginAt: string | null;
 }

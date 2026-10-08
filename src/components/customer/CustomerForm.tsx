@@ -40,8 +40,8 @@ export default function CustomerForm({ onSubmit, initial }: Props) {
             <Input name="name" value={form.name} onChange={handle} required />
           </div>
           <div>
-            <Label>Email</Label>
-            <Input name="email" value={form.email} onChange={handle} required />
+            <Label>Email (opcional)</Label>
+            <Input name="email" value={form.email} onChange={handle} />
           </div>
           <div>
             <Label>Telefone</Label>

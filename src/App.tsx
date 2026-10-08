@@ -14,6 +14,13 @@ import ProtocolPage from '@/pages/ProtocolPage';
 import ProductsPage from '@/pages/ProductsPage';
 import ReceiptsPage from '@/pages/ReceiptsPage';
 import HistoryPage from '@/pages/HistoryPage';
+import ChangePasswordPage from '@/pages/ChangePasswordPage';
+import UsersPage from '@/pages/UsersPage';
+import type { Role } from '@/types';
+
+// Revenue pages: not for STAFF (groomers). Account management: OWNER and ADMIN only.
+const FINANCE: Role[] = ['OWNER', 'ADMIN', 'VIEWER'];
+const MANAGERS: Role[] = ['OWNER', 'ADMIN'];
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -40,10 +47,12 @@ export default function App() {
          <Route path="/scheduling/:id" element={<PrivateRoute><Layout><SchedulingPage /></Layout></PrivateRoute>} />
           <Route path="/protocol" element={<PrivateRoute><Layout><ProtocolPage /></Layout></PrivateRoute>} />
           <Route path="/pack" element={<PrivateRoute><Layout><PackPage /></Layout></PrivateRoute>} />
-          <Route path="/report" element={<PrivateRoute><Layout><ReportPage /></Layout></PrivateRoute>} />
+          <Route path="/report" element={<PrivateRoute roles={FINANCE}><Layout><ReportPage /></Layout></PrivateRoute>} />
           <Route path="/products" element={<PrivateRoute><Layout><ProductsPage /></Layout></PrivateRoute>} />
-          <Route path="/receipts" element={<PrivateRoute><Layout><ReceiptsPage /></Layout></PrivateRoute>} />
+          <Route path="/receipts" element={<PrivateRoute roles={FINANCE}><Layout><ReceiptsPage /></Layout></PrivateRoute>} />
           <Route path="/history" element={<PrivateRoute><Layout><HistoryPage /></Layout></PrivateRoute>} />
+          <Route path="/users" element={<PrivateRoute roles={MANAGERS}><Layout><UsersPage /></Layout></PrivateRoute>} />
+          <Route path="/change-password" element={<PrivateRoute allowPendingPasswordChange><ChangePasswordPage /></PrivateRoute>} />
 
         </Routes>
         <Toaster />

@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -15,10 +16,12 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
     try {
-      await login(username, password);
-      navigate('/customers');
-    } catch {
-      setError('Usuário ou senha incorretos');
+      const user = await login(email, password);
+      navigate(user.mustChangePassword ? '/change-password' : '/customers');
+    } catch (err) {
+      // 401 wrong e-mail/password, 429 too many attempts: the API says which, in Portuguese.
+      const detail = axios.isAxiosError(err) ? (err.response?.data as { detail?: string } | undefined)?.detail : undefined;
+      setError(detail ?? 'Não foi possível entrar. Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -96,13 +99,14 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
               <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--brand-green)' }}>
-                Usuário
+                E-mail
               </label>
               <input
-                type="text"
-                value={username}
-                onChange={e => setUsername(e.target.value)}
-                placeholder="Digite seu usuário"
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="seu@email.com"
+                autoComplete="username"
                 required
                 className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
                 style={{
@@ -122,6 +126,7 @@ export default function LoginPage() {
               </label>
               <input
                 type="password"
+                autoComplete="current-password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="••••••••"

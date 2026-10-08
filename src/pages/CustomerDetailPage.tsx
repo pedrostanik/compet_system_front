@@ -88,7 +88,7 @@ export default function CustomerDetailPage() {
       </div>
 
       <div className="bg-white rounded-lg border p-4 flex flex-col gap-1 text-sm">
-        <p><span className="text-gray-500">Email:</span> {customer.email}</p>
+        <p><span className="text-gray-500">Email:</span> {customer.email || '—'}</p>
         <p><span className="text-gray-500">Telefone:</span> {customer.phone}</p>
         <p><span className="text-gray-500">CPF:</span> {customer.cpf}</p>
         <p><span className="text-gray-500">Endereço:</span> {customer.address}</p>

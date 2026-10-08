@@ -1,24 +1,30 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { House, Users, CalendarDays, Package, BarChart2, Menu, X, FileText, ShoppingBag, Receipt, LogOut, History } from 'lucide-react';
+import { House, Users, CalendarDays, Package, BarChart2, Menu, X, FileText, ShoppingBag, Receipt, LogOut, History, UserCog, KeyRound } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import type { Role } from '@/types';
+
+// Same rules as the routes in App.tsx (and the API's SecurityConfig).
+const FINANCE: Role[] = ['OWNER', 'ADMIN', 'VIEWER'];
+const MANAGERS: Role[] = ['OWNER', 'ADMIN'];
 
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
-  const { logout } = useAuth();
+  const { logout, user, hasRole } = useAuth();
 
-  const links = [
+  const links: { to: string; icon: React.ReactNode; label: string; roles?: Role[] }[] = [
     { to: '/home',       icon: <House size={16} />,        label: 'Home' },
     { to: '/customers',  icon: <Users size={16} />,       label: 'Clientes' },
     { to: '/scheduling', icon: <CalendarDays size={16} />, label: 'Calendário' },
     { to: '/protocol',   icon: <FileText size={16} />,     label: 'Serviços' },
     { to: '/pack',       icon: <Package size={16} />,      label: 'Pacotes' },
     { to: '/products',   icon: <ShoppingBag size={16} />,  label: 'Produtos' },
-    { to: '/receipts',   icon: <Receipt size={16} />,      label: 'Recibos' },
-    { to: '/report',     icon: <BarChart2 size={16} />,    label: 'Relatório' },
+    { to: '/receipts',   icon: <Receipt size={16} />,      label: 'Recibos',   roles: FINANCE },
+    { to: '/report',     icon: <BarChart2 size={16} />,    label: 'Relatório', roles: FINANCE },
     { to: '/history',    icon: <History size={16} />,      label: 'Histórico' },
-
+    { to: '/users',      icon: <UserCog size={16} />,      label: 'Usuários',  roles: MANAGERS },
   ];
+  const visibleLinks = links.filter(link => !link.roles || hasRole(...link.roles));
 
   return (
     <>
@@ -62,7 +68,7 @@ export default function Sidebar() {
 
         {/* Links */}
         <nav className="flex-1 px-3 py-4 flex flex-col gap-1">
-          {links.map(({ to, icon, label }) => (
+          {visibleLinks.map(({ to, icon, label }) => (
             <NavLink
               key={to}
               to={to}
@@ -84,10 +90,23 @@ export default function Sidebar() {
           ))}
         </nav>
 
-        {/* Logout */}
+        {/* Logged-in user, change password, logout */}
         <div className="px-3 pb-4 border-t border-white/10 pt-3">
+          {user && (
+            <div className="px-3 pb-2">
+              <p className="text-white text-sm font-semibold truncate">{user.name}</p>
+              <p className="text-white/40 text-xs truncate">{user.email}</p>
+            </div>
+          )}
+          <NavLink
+            to="/change-password"
+            onClick={() => setOpen(false)}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/60 hover:text-white hover:bg-white/10 transition-all"
+          >
+            <KeyRound size={16} /> Alterar senha
+          </NavLink>
           <button
-            onClick={logout}
+            onClick={() => logout()}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/60 hover:text-white hover:bg-white/10 transition-all"
           >
             <LogOut size={16} /> Sair

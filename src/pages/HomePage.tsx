@@ -11,6 +11,7 @@ import {
   isWithinInterval,
 } from 'date-fns';
 import { getSchedulings } from '@/api/schedulingApi';
+import { useAuth } from '@/context/AuthContext';
 // import { getReceipts } from '@/api/receiptApi';
 import type { SchedulingResponse } from '@/types';
 
@@ -29,6 +30,9 @@ function inRange(iso: string | undefined, range: Range) {
 }
 
 export default function HomePage() {
+  // Groomers (STAFF) do not see revenue figures.
+  const { hasRole } = useAuth();
+  const showRevenue = !hasRole('STAFF');
   const [schedulings, setSchedulings] = useState<SchedulingResponse[]>([]);
   //const [receipts, setReceipts] = useState<ReceiptResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -123,19 +127,20 @@ export default function HomePage() {
       ink: '#FFFFFF',
     },
   ];
+  const visibleTiles = showRevenue ? tiles : tiles.filter(tile => !tile.key.endsWith('revenue'));
 
   return (
     <div className="flex flex-col gap-6 h-full">
       <div>
         <h2 className="text-xl font-semibold">Home</h2>
         <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-          Resumo dos agendamentos e do faturamento
+          {showRevenue ? 'Resumo dos agendamentos e do faturamento' : 'Resumo dos agendamentos'}
         </p>
       </div>
 
       <div className="flex-1 flex items-center justify-center">
         <div className="grid w-full max-w-3xl grid-cols-1 sm:grid-cols-2 gap-5">
-          {tiles.map(tile => (
+          {visibleTiles.map(tile => (
             <div
               key={tile.key}
               className="rounded-2xl p-6 shadow-sm flex flex-col justify-between gap-4 min-h-[150px]"

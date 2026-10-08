@@ -195,7 +195,7 @@ export default function CustomersPage() {
             onSubmit={handleEdit}
             initial={customerToEdit ? {
               name: customerToEdit.name,
-              email: customerToEdit.email,
+              email: customerToEdit.email ?? undefined,
               phone: customerToEdit.phone,
               address: customerToEdit.address,
               obs: customerToEdit.obs,
